@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:app="http://schemas.android.com/apk/res-auto"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+	<android.support.v7.widget.Toolbar
+			android:layout_width="match_parent"
+			android:id="@+id/toolbar"
+			android:background="@color/colorPrimary"
+			app:layout_constraintTop_toTopOf="parent"
+			app:title="@string/app_name"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+		  	android:layout_height="56dp"/>
+
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Status"
+			android:textSize="18sp"
+			android:id="@+id/statusTextView"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toBottomOf="@+id/toolbar"
+			app:layout_constraintBottom_toTopOf="@+id/myNumberTextView"
+	/>
+
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="My Number"
+			android:textSize="18sp"
+			android:layout_marginBottom="8dp"
+			app:layout_constraintBottom_toTopOf="@+id/myNumberTextView"
+			app:layout_constraintLeft_toLeftOf="@+id/myNumberTextView"
+			android:textStyle="bold"/>
+
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="alice@192.56.93.2"
+			android:textSize="18sp"
+			android:id="@+id/myNumberTextView"
+			app:layout_constraintBottom_toTopOf="@+id/numberEditText"
+			app:layout_constraintLeft_toLeftOf="@+id/numberEditText"
+			app:layout_constraintTop_toBottomOf="@+id/statusTextView"
+	/>
+
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Calling"
+			android:textSize="18sp"
+			android:layout_marginBottom="8dp"
+			app:layout_constraintBottom_toTopOf="@+id/numberEditText"
+			app:layout_constraintLeft_toLeftOf="@+id/numberEditText"
+			android:textStyle="bold"/>
+
+	<EditText
+			android:layout_width="200dp"
+			android:layout_height="wrap_content"
+			android:text="127.0.0.1"
+			android:id="@+id/numberEditText"
+			app:layout_constraintBottom_toTopOf="@+id/callButton"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toBottomOf="@+id/myNumberTextView"/>
+
+	<ImageButton
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/callButton"
+			app:layout_constraintBottom_toBottomOf="parent"
+			android:layout_marginBottom="48dp"
+			app:layout_constraintLeft_toLeftOf="parent"
+			android:background="@android:color/white"
+			app:layout_constraintRight_toLeftOf="@+id/closeCallButton"
+			android:src="@mipmap/ic_call"/>
+
+	<ImageButton
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/closeCallButton"
+			app:layout_constraintBottom_toBottomOf="@+id/callButton"
+			app:layout_constraintTop_toTopOf="@+id/callButton"
+			android:background="@android:color/white"
+			app:layout_constraintLeft_toRightOf="@+id/callButton"
+			app:layout_constraintRight_toRightOf="parent"
+			android:src="@mipmap/ic_close"
+	/>
+
+</android.support.constraint.ConstraintLayout>
