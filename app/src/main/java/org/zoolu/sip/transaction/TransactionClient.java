@@ -30,7 +30,7 @@ import org.zoolu.tools.Timer;
 
 
 /** Generic client transaction as defined in RFC 3261 (Section 17.1.2).
- *  A TransactionClient is responsable to create a new SIP transaction, starting with a request message sent through the SipProvider and ending with a final response.<BR>
+ *  A TransactionClient is responsible to create a new SIP transaction, starting with a request message sent through the SipProvider and ending with a final response.<BR>
  *  The changes of the internal status and the received messages are fired to the TransactionListener passed to the TransactionClient object.<BR>
  */
 

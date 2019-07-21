@@ -18,8 +18,10 @@ import java.util.Vector;
 
 /** UserAgentProfile maintains the user configuration.
  */
-public class UserAgentProfile extends Configure
-{
+public class UserAgentProfile extends Configure {
+
+    private static final String TAG = "Sip: UserAgentProfile";
+
     /** The default configuration file */
     private static String config_file="mjsip.cfg";
 
@@ -28,7 +30,7 @@ public class UserAgentProfile extends Configure
     /** Display name for the user.
      * It is used in the user's AOR registered to the registrar server
      * and used as From URL. */
-    String display_name = null;
+    public String display_name = null;
 
     /** User's name.
      * It is used to build the user's AOR registered to the registrar server
@@ -252,22 +254,22 @@ public class UserAgentProfile extends Configure
 
     // ************************** costructors *************************
 
-    /** Costructs a void UserAgentProfile */
-    public UserAgentProfile()
-    {  init();
+    /** Constructs a void UserAgentProfile */
+    public UserAgentProfile() {
+        init();
     }
 
-    /** Costructs a new UserAgentProfile */
-    public UserAgentProfile(String file)
-    {  // load configuration
+    /** Constructs a new UserAgentProfile */
+    public UserAgentProfile(String file) {
+        // load configuration
         loadFile(file);
-        // post-load manipulation
+        // 1post-load manipulation
         init();
     }
 
     /** Inits the UserAgentProfile. */
-    private void init()
-    {  if (proxy!=null && proxy.equalsIgnoreCase(Configure.NONE)) proxy=null;
+    private void init() {
+        if (proxy!=null && proxy.equalsIgnoreCase(Configure.NONE)) proxy=null;
         if (registrar!=null && registrar.equalsIgnoreCase(Configure.NONE)) registrar=null;
         if (display_name!=null && display_name.equalsIgnoreCase(Configure.NONE)) display_name=null;
         if (user!=null && user.equalsIgnoreCase(Configure.NONE)) user=null;
@@ -350,9 +352,11 @@ public class UserAgentProfile extends Configure
      * In case of <i>proxy</i> and <i>user</i> parameters have been defined
      * it is formed as "<i>display_name</i>"&lt;sip:<i>user</i>@<i>proxy</i>&rt,
      * otherwhise the local MyUA address (obtained by the SipProvider) is used. */
-    public NameAddress getUserURI()
-    {  if (proxy!=null && user!=null) return new NameAddress(display_name,new SipURL(user,proxy));
-    else return new NameAddress(display_name,new SipURL(user,ua_address));
+    public NameAddress getUserURI() {
+        if (proxy != null && user != null)
+            return new NameAddress(display_name, new SipURL(user, proxy));
+        else
+            return new NameAddress(display_name,new SipURL(user, ua_address));
     }
 
     /** Sets the user's AOR (Address Of Record) registered to the registrar server

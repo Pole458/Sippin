@@ -24,6 +24,9 @@
 package org.zoolu.net;
 
 
+import android.os.Looper;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
@@ -151,41 +154,40 @@ public class UdpProvider extends Thread
 
 
     /** The main thread */
-    public void run()
-    {
-        byte[] buf=new byte[BUFFER_SIZE];
-        UdpPacket packet=new UdpPacket(buf, buf.length);
+    public void run() {
+        byte[] buf = new byte[BUFFER_SIZE];
+        UdpPacket packet = new UdpPacket(buf, buf.length);
 
-        Exception error=null;
-        long expire=0;
-        if (alive_time>0) expire=System.currentTimeMillis()+alive_time;
-        try
-        {  socket.setSoTimeout(socket_timeout);
+        Exception error = null;
+        long expire = 0;
+        if (alive_time > 0) expire = System.currentTimeMillis()+alive_time;
+        try {
+            socket.setSoTimeout(socket_timeout);
             // loop
-            while(!stop)
-            {  try
-            {  socket.receive(packet);
-            }
-            catch (InterruptedIOException ie)
-            {  if (alive_time>0 && System.currentTimeMillis()>expire) halt();
-                continue;
-            }
-                if (packet.getLength()>=minimum_length)
-                {  if (listener!=null) listener.onReceivedPacket(this,packet);
-                    if (alive_time>0) expire=System.currentTimeMillis()+alive_time;
+            while(!stop) {
+                try {
+                    socket.receive(packet);
                 }
-                packet=new UdpPacket(buf, buf.length);
+                catch (InterruptedIOException ie) {
+                    if (alive_time>0 && System.currentTimeMillis() > expire) halt();
+                    continue;
+                }
+                if (packet.getLength() >= minimum_length) {
+                    if (listener != null) listener.onReceivedPacket(this,packet);
+                    if (alive_time > 0) expire=System.currentTimeMillis()+alive_time;
+                }
+                packet = new UdpPacket(buf, buf.length);
             }
         }
-        catch (Exception e)
-        {  error=e;
+        catch (Exception e) {
+            error = e;
             stop=true;
         }
-        is_running=false;
-        if (listener!=null) listener.onServiceTerminated(this,error);
-        listener=null;
-    }
 
+        is_running = false;
+        if (listener != null) listener.onServiceTerminated(this, error);
+        listener = null;
+    }
 
     /** Gets a String representation of the Object */
     public String toString()

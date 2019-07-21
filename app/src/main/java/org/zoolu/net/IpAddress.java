@@ -23,6 +23,9 @@
 
 package org.zoolu.net;
 
+import android.util.Log;
+
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -34,16 +37,16 @@ import java.util.Enumeration;
 public class IpAddress {
 
     /** The host address/name */
-    String address;
+    private String address;
 
     /** The InetAddress */
-    InetAddress inet_address;
+    private InetAddress inet_address;
 
     // ********************* Protected *********************
 
     /** Creates an IpAddress */
     IpAddress(InetAddress iaddress) {
-        init(null,iaddress);
+        init(null, iaddress);
     }
 
     /** Inits the IpAddress */
@@ -75,7 +78,7 @@ public class IpAddress {
     {  return new IpAddress(this);
     }
 
-    /** Wthether it is equal to Object <i>obj</i> */
+    /** Whether it is equal to Object <i>obj</i> */
     public boolean equals(Object obj)
     {  try
     {  IpAddress ipaddr=(IpAddress)obj;
@@ -87,7 +90,7 @@ public class IpAddress {
 
     /** Gets a String representation of the Object */
     public String toString()
-    {  if (address==null && inet_address!=null) address=inet_address.getHostAddress();
+    {  if (address==null && inet_address!=null) address = inet_address.getHostAddress();
         return address;
     }
 
@@ -110,7 +113,7 @@ public class IpAddress {
                 Enumeration<InetAddress> iaddrs = networks.nextElement().getInetAddresses();
                 while (iaddrs.hasMoreElements()) {
                     InetAddress iaddr = iaddrs.nextElement();
-                    if(!iaddr.isLoopbackAddress())
+                    if(!iaddr.isLoopbackAddress() && iaddr instanceof Inet4Address)
                         return new IpAddress(iaddr);
                 }
 
@@ -123,46 +126,5 @@ public class IpAddress {
 
         return null;
 
-        // Removed injection
-
-//      // Note:
-//      // 1) in this method, java reflection is used in order to keep backward compatibility
-//      //    with java3 VM (e.g. jdk1.3) at both compiling and/or execution time
-//      // 2) it can be compiled with java3, regardless it is executed with java3 or java4 VMs
-//      IpAddress ip_address=null;
-//      try {
-//         // continue only with java4 VM (e.g. jdk1.4) or later, otherwise ClassNotFoundException is thrown
-//         Class network_interface_class=Class.forName("java.net.NetworkInterface");
-//         Class inet4_address_class=Class.forName("java.net.Inet4Address");
-//         //System.out.println("IpAddress: java4 VM (or later) detected");
-//         // only with java4 VM
-//         //Enumeration networks=java.net.NetworkInterface.getNetworkInterfaces(); // this line can be compiled only with java4
-//         Enumeration networks=(Enumeration)network_interface_class.getMethod("getNetworkInterfaces",null).invoke(null,null);
-//         while (networks.hasMoreElements())
-//         {  //Enumeration iaddrs=((java.net.NetworkInterface)networks.nextElement()).getInetAddresses(); // this line can be compiled only with java4
-//            Enumeration iaddrs=(Enumeration)network_interface_class.getMethod("getInetAddresses",null).invoke(networks.nextElement(),null);
-//            while (iaddrs.hasMoreElements())
-//            {  InetAddress iaddr=(InetAddress)iaddrs.nextElement();
-//               //if (iaddr.getClass().getName().equals("java.net.Inet4Address") && !iaddr.isLoopbackAddress()) return new IpAddress(iaddr); // this line can be compiled only with java4
-//               if (iaddr.getClass().getName().equals("java.net.Inet4Address") && !((Boolean)inet4_address_class.getMethod("isLoopbackAddress",null).invoke(iaddr,null)).booleanValue()) ip_address=new IpAddress(iaddr);
-//            }
-//         }
-//      }
-//      catch (ClassNotFoundException e) {}
-//      catch (Exception e) {}
-//      // else
-//      if (ip_address==null)
-//      {  try
-//         {  //System.out.println("IpAddress: java3 VM detected");
-//            ip_address = new IpAddress(InetAddress.getLocalHost());
-//         }
-//         catch (java.net.UnknownHostException e) {}
-//      }
-//      // else
-//      if (ip_address==null) ip_address=new IpAddress("127.0.0.1");
-//
-//      //System.out.println("IpAddress: "+ip_address.toString());
-//      return ip_address;
     }
-
 }

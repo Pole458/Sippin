@@ -258,7 +258,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     /** Makes a new call (acting as UAC) with specific media description (Vector of MediaDesc). */
     public void call(String callee, Vector media_descs) {
         // in case of incomplete url (e.g. only 'user' is present), try to complete it
-        call(completeNameAddress(callee),media_descs);
+        call(completeNameAddress(callee), media_descs);
     }
 
 
@@ -271,18 +271,20 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     /** Makes a new call (acting as UAC) with specific media description (Vector of MediaDesc). */
     public void call(NameAddress callee, Vector media_descs) {
         // new media description
-        if (media_descs==null) media_descs = ua_profile.media_descs;
-        this.media_descs=media_descs;
+        if (media_descs == null)
+            media_descs = ua_profile.media_descs;
+        this.media_descs = media_descs;
         // new call
-        Log.v(TAG, "DEBUG: auth_user="+ua_profile.auth_user+"@"+ua_profile.auth_realm);
-        call=new ExtendedCall(sip_provider,ua_profile.getUserURI(),ua_profile.auth_user,ua_profile.auth_realm,ua_profile.auth_passwd,this);
-        if (ua_profile.no_offer) call.call(callee);
-        else
-        {  SessionDescriptor local_sdp=getSessionDescriptor(media_descs);
-            call.call(callee,local_sdp.toString());
+        Log.v(TAG, "DEBUG: auth_user = " + ua_profile.auth_user + "@" + ua_profile.auth_realm);
+        call = new ExtendedCall(sip_provider,ua_profile.getUserURI(),ua_profile.auth_user,ua_profile.auth_realm,ua_profile.auth_passwd,this);
+        if(ua_profile.no_offer)
+            call.call(callee);
+        else {
+            SessionDescriptor local_sdp=getSessionDescriptor(media_descs);
+            call.call(callee, local_sdp.toString());
         }
-        progress=false;
-        ringing=false;
+        progress = false;
+        ringing = false;
     }
 
     /** Closes an ongoing, incoming, or pending call. */

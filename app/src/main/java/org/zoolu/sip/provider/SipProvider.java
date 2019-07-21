@@ -262,8 +262,10 @@ public class SipProvider implements Configurable, TransportListener {
     /** Inits the SipProvider, initializing the SipProviderListeners, the transport protocols, the outbound proxy, and other attributes. */
     private void init(String via_addr, int host_port) {
         if (!SipStack.isInit()) SipStack.init();
-        if (via_addr == null || via_addr.equalsIgnoreCase(AUTO_CONFIGURATION))
+        if (via_addr == null || via_addr.equalsIgnoreCase(AUTO_CONFIGURATION)) {
             via_addr = IpAddress.getLocalHostAddress().toString();
+        }
+
         this.via_addr = via_addr;
         if (host_port<=0) host_port=SipStack.default_port;
         this.host_port=host_port;
@@ -313,10 +315,9 @@ public class SipProvider implements Configurable, TransportListener {
             if (transp!=null)
             {  setTransport(transp);
             }
-        }
-        catch (Exception e) {
-            Log.e(TAG, "", e);
-        }
+        } catch (Exception e) {
+            e.printStackTrace();
+            }
         }
     }
 
@@ -327,7 +328,7 @@ public class SipProvider implements Configurable, TransportListener {
     {  for(Enumeration e=sip_transports.keys(); e.hasMoreElements(); )
     {  String proto=(String)e.nextElement();
         Transport transp=(Transport)sip_transports.get(proto);
-        Log.v(TAG, proto+" is going down");
+        Log.v(TAG, proto + " is going down");
         transp.halt();
     }
         sip_transports.clear();
@@ -337,15 +338,15 @@ public class SipProvider implements Configurable, TransportListener {
 
 
     /** Sets a specific transport protocol. */
-    public void setTransport(Transport transport)
-    {  String proto=transport.getProtocol();
+    public void setTransport(Transport transport) {
+        String proto = transport.getProtocol();
         removeTransport(proto);
         sip_transports.put(proto,transport);
         transport.setListener(this);
-        if (default_transport==null) default_transport=proto;
-        Log.v(TAG, proto+" is up at port "+transport.getLocalPort());
+        if(default_transport == null)
+            default_transport = proto;
+        Log.v(TAG, proto + " is up at port " + transport.getLocalPort());
     }
-
 
     /** Removes a specific transport protocol. */
     public void removeTransport(String proto)
@@ -464,9 +465,10 @@ public class SipProvider implements Configurable, TransportListener {
     }
 
     /** Gets a valid contact address with user name and transport information. */
-    public SipURL getContactAddress(String user)
-    {  SipURL url=(getPort()!=SipStack.default_port)? new SipURL(user,getViaAddress(),getPort()) : new SipURL(user,getViaAddress());
-        if (!hasTransport(PROTO_UDP)) url.addTransport(getDefaultTransport());
+    public SipURL getContactAddress(String user) {
+        SipURL url = (getPort() != SipStack.default_port) ? new SipURL(user, getViaAddress(), getPort()) : new SipURL(user, getViaAddress());
+        if(!hasTransport(PROTO_UDP))
+            url.addTransport(getDefaultTransport());
         return url;
     }
 

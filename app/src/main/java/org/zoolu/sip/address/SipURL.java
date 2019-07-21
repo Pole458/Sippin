@@ -93,17 +93,17 @@ public class SipURL
    }
 
    /** Creates a new SipURL. */
-   public SipURL(String username, String hostname, int portnumber)
-   {  init(username,hostname,portnumber);
+   public SipURL(String username, String hostname, int portnumber) {
+      init(username,hostname,portnumber);
    }
 
    /** Inits the SipURL. */
-   private void init(String username, String hostname, int portnumber)
-   {  StringBuffer sb=new StringBuffer(getScheme());
+   private void init(String username, String hostname, int portnumber) {
+      StringBuffer sb = new StringBuffer(getScheme());
       sb.append(':');
       if (username!=null) sb.append(username).append('@');
       sb.append(hostname);
-      if (portnumber>0) sb.append(":"+portnumber);
+      if (portnumber>0) sb.append(":" + portnumber);
       url=sb.toString();
    }
 
