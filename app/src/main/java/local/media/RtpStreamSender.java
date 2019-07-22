@@ -35,13 +35,12 @@ import java.net.DatagramSocket;
 /** RtpStreamSender is a generic RTP sender.
  * It takes media from a given InputStream and sends it through RTP packets to a remote destination.
  */
-public class RtpStreamSender extends Thread
-{
+public class RtpStreamSender extends Thread {
     /** Whether working in debug mode. */
     public static boolean DEBUG=false;
 
     /** The InputStream */
-    InputStream input_stream=null;
+    InputStream input_stream = null;
 
     /** The RtpSocket */
     RtpSocket rtp_socket=null;
@@ -116,8 +115,8 @@ public class RtpStreamSender extends Thread
      * @param src_socket the socket used to send the RTP packet
      * @param dest_addr the destination address
      * @param dest_port the destination port */
-    public RtpStreamSender(InputStream input_stream, boolean do_sync, int payload_type, long frame_rate, int frame_size, UdpSocket src_socket, String dest_addr, int dest_port)
-    {  init(input_stream,do_sync,payload_type,frame_rate,frame_size,src_socket,dest_addr,dest_port);
+    public RtpStreamSender(InputStream input_stream, boolean do_sync, int payload_type, long frame_rate, int frame_size, UdpSocket src_socket, String dest_addr, int dest_port) {
+        init(input_stream,do_sync,payload_type,frame_rate,frame_size,src_socket,dest_addr,dest_port);
     }
 
     /** Inits the RtpStreamSender */
@@ -201,38 +200,34 @@ public class RtpStreamSender extends Thread
         if (DEBUG) println("RTP: localhost:"+rtp_socket.getUdpSocket().getLocalPort()+" --> "+rtp_socket.getRemoteAddress().toString()+":"+rtp_socket.getRemotePort());
         if (DEBUG) println("RTP: sending pkts of "+(packet_buffer.length-12)+" bytes of RTP payload");
 
-        try
-        {  while (running)
-        {
-            //int num=input_stream.read(packet_buffer,12,packet_buffer.length-12);
-            int num=read(input_stream,packet_buffer,12,packet_buffer.length-12);
-            if (num>0)
-            {  rtp_packet.setSequenceNumber(seqn++);
-                rtp_packet.setTimestamp(time);
-                rtp_packet.setPayloadLength(num);
-                rtp_socket.send(rtp_packet);
-                // update rtp timestamp (in milliseconds)
-                long frame_time=(num*1000)/byte_rate;
-                time+=frame_time;
-                // wait for next departure
-                if (do_sync || sync_adj>0)
-                {  // wait before next departure..
-                    //long sleep_time=frame_time;
-                    long sleep_time=start_time+time-System.currentTimeMillis();
-                    // compensate possible inter-time reduction due to the approximated time obtained by System.currentTimeMillis()
-                    long min_time=frame_time/2;
-                    // compensate possible program latency
-                    sleep_time-=sync_adj;
-                    if (sleep_time<min_time) sleep_time=min_time;
-                    if (sleep_time>0) try {  Thread.sleep(sleep_time);  } catch (Exception e) {}
+        try {
+            while (running) {
+                int num = read(input_stream, packet_buffer,12,packet_buffer.length-12);
+                if (num > 0) {
+                    rtp_packet.setSequenceNumber(seqn++);
+                    rtp_packet.setTimestamp(time);
+                    rtp_packet.setPayloadLength(num);
+                    rtp_socket.send(rtp_packet);
+                    // update rtp timestamp (in milliseconds)
+                    long frame_time=(num*1000)/byte_rate;
+                    time+=frame_time;
+                    // wait for next departure
+                    if (do_sync || sync_adj>0) {
+                        // wait before next departure..
+                        //long sleep_time=frame_time;
+                        long sleep_time = start_time + time - System.currentTimeMillis();
+                        // compensate possible inter-time reduction due to the approximated time obtained by System.currentTimeMillis()
+                        long min_time = frame_time / 2;
+                        // compensate possible program latency
+                        sleep_time -= sync_adj;
+                        if (sleep_time < min_time) sleep_time = min_time;
+                        if (sleep_time > 0) try {  Thread.sleep(sleep_time);  } catch (Exception e) {}
+                    }
+                } else if (num < 0) {
+                    if (DEBUG) println("Error reading from InputStream");
+                    running = false;
                 }
             }
-            else
-            if (num<0)
-            {  if (DEBUG) println("Error reading from InputStream");
-                running=false;
-            }
-        }
         }
         catch (Exception e) {  running=false;  e.printStackTrace();  }
 
@@ -257,8 +252,8 @@ public class RtpStreamSender extends Thread
      * and can be re-defined by a class that extends RtpStreamSender in order to
      * implement new RTP encoding mechanisms.
      * @return It returns the number of bytes read. */
-    protected int read(InputStream input_stream, byte[] buff, int off, int len) throws Exception
-    {  return input_stream.read(buff,12,buff.length-12);
+    protected int read(InputStream input_stream, byte[] buff, int off, int len) throws Exception {
+        return input_stream.read(buff,12,buff.length-12);
     }
 
 

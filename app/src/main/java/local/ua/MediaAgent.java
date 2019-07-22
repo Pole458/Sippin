@@ -129,7 +129,7 @@ class MediaAgent {
 
         // Android audio app
         if (ua_profile.javax_sound_app == null) {
-            audio_app = new AndroidAudioApp(audio_flow,audio_in,audio_out,ua_profile.javax_sound_direct_convertion,ua_profile.javax_sound_sync,ua_profile.random_early_drop_rate,ua_profile.symmetric_rtp);
+            audio_app = new AndroidAudioApp(audio_flow, ua_profile.javax_sound_sync,ua_profile.random_early_drop_rate,ua_profile.symmetric_rtp);
         }
 
         return audio_app;

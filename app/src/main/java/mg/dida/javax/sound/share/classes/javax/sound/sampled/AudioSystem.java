@@ -795,7 +795,6 @@ public class AudioSystem {
 	 */
 	public static AudioFormat.Encoding[] getTargetEncodings(AudioFormat sourceFormat) {
 
-
 		List codecs = getFormatConversionProviders();
 		Vector encodings = new Vector();
 

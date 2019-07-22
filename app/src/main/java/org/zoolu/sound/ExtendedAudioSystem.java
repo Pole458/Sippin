@@ -21,6 +21,7 @@
 
 package org.zoolu.sound;
 
+import android.util.Log;
 import mg.dida.javax.sound.share.classes.javax.sound.sampled.*;
 
 /** ExtendedAudioSystem is a static class that allows the access to system audio
@@ -43,8 +44,10 @@ import mg.dida.javax.sound.share.classes.javax.sound.sampled.*;
  *      audio data of a specified format; the default format is PCM ULAW 8kHz mono
  * </ul>
  */
-public class ExtendedAudioSystem
-{
+public class ExtendedAudioSystem {
+
+    private static final String TAG = "Sip: ExtAudioSystem";
+
     /** Internal buffer size. */
     public static final int INTERNAL_BUFFER_SIZE=40960;
 
@@ -64,27 +67,28 @@ public class ExtendedAudioSystem
 
 
     /** Inits the static system audio input line */
-    public static void initAudioInputLine()
-    {  if (DEBUG)
-    {  AudioFormat.Encoding[] codecs = AudioSystem.getTargetEncodings(base_format);
-        String codec_list="";
-        for (int i=0; i<codecs.length; i++) codec_list+=" "+codecs[i].toString();
-        printLog("Supported:"+codec_list);
-    }
+    public static void initAudioInputLine() {
+        if (DEBUG) {
+            AudioFormat.Encoding[] codecs = AudioSystem.getTargetEncodings(base_format);
+            StringBuilder codec_list = new StringBuilder();
+            for (AudioFormat.Encoding codec : codecs)
+                codec_list.append(" ").append(codec.toString());
 
-        DataLine.Info lineInfo=new DataLine.Info(TargetDataLine.class,base_format,INTERNAL_BUFFER_SIZE);
-
-        if (!AudioSystem.isLineSupported(lineInfo))
-        {  System.err.println("ERROR: AudioLine not supported by this system.");
+            Log.v(TAG, "Supported:"+codec_list);
         }
 
-        try
-        {  target_line=(TargetDataLine)AudioSystem.getLine(lineInfo);
-            if (DEBUG) printLog("TargetDataLine: "+target_line.getFormat());
+        DataLine.Info lineInfo = new DataLine.Info(TargetDataLine.class, base_format, INTERNAL_BUFFER_SIZE);
+
+        if (!AudioSystem.isLineSupported(lineInfo)) {
+            Log.v(TAG, "ERROR: AudioLine not supported by this system.");
+        }
+
+        try {
+            target_line=(TargetDataLine)AudioSystem.getLine(lineInfo);
+            if (DEBUG) Log.v(TAG, "TargetDataLine: "+target_line.getFormat());
             target_line.open(base_format,INTERNAL_BUFFER_SIZE);
-        }
-        catch (Exception e)
-        {  System.err.println("ERROR: Exception when trying to init audio input: "+e.getMessage());
+        } catch (Exception e) {
+            Log.v(TAG, "ERROR: Exception when trying to init audio input: "+e.getMessage());
             //e.printStackTrace();
         }
     }
@@ -102,22 +106,22 @@ public class ExtendedAudioSystem
     {  AudioFormat.Encoding[] codecs=AudioSystem.getTargetEncodings(base_format);
         String codec_list="";
         for (int i=0; i<codecs.length; i++) codec_list+=" "+codecs[i].toString();
-        printLog("Supported:"+codec_list);
+        Log.v(TAG, "Supported:"+codec_list);
     }
 
         DataLine.Info lineInfo=new DataLine.Info(SourceDataLine.class, base_format, INTERNAL_BUFFER_SIZE);
 
         if (!AudioSystem.isLineSupported(lineInfo))
-        {  System.err.println("ERROR: AudioLine not supported by this System.");
+        {  Log.v(TAG, "ERROR: AudioLine not supported by this System.");
         }
 
         try
         {  source_line=(SourceDataLine)AudioSystem.getLine(lineInfo);
-            if (DEBUG) printLog("SourceDataLine: "+source_line.getFormat());
+            if (DEBUG) Log.v(TAG, "SourceDataLine: "+source_line.getFormat());
             source_line.open(base_format,INTERNAL_BUFFER_SIZE);
         }
         catch (Exception e)
-        {  System.err.println("ERROR: Exception when trying to init audio output at ExtendedAudioSystem: "+e.getMessage());
+        {  Log.v(TAG, "ERROR: Exception when trying to init audio output at ExtendedAudioSystem: "+e.getMessage());
             //e.printStackTrace();
         }
     }
@@ -134,7 +138,7 @@ public class ExtendedAudioSystem
     {  if (target_line==null) initAudioInputLine();
         if (target_line.isOpen()) target_line.start();
         else
-        {  System.err.println("WARNING: Audio play error: target line is not open.");
+        {  Log.v(TAG, "WARNING: Audio play error: target line is not open.");
         }
     }
 
@@ -143,7 +147,7 @@ public class ExtendedAudioSystem
     public static void stopAudioInputLine()
     {  if (target_line.isOpen()) target_line.stop();
     else
-    {  System.err.println("WARNING: Audio stop error: target line is not open.");
+    {  Log.v(TAG, "WARNING: Audio stop error: target line is not open.");
     }
         //target_line.close();
     }
@@ -154,7 +158,7 @@ public class ExtendedAudioSystem
     {  if (source_line==null) initAudioOutputLine();
         if (source_line.isOpen()) source_line.start();
         else
-        {  System.err.println("WARNING: Audio play error: source line is not open.");
+        {  Log.v(TAG, "WARNING: Audio play error: source line is not open.");
         }
     }
 
@@ -166,7 +170,7 @@ public class ExtendedAudioSystem
         source_line.stop();
     }
     else
-    {  System.err.println("WARNING: Audio stop error: source line is not open.");
+    {  Log.v(TAG, "WARNING: Audio stop error: source line is not open.");
     }
         //source_line.close();
     }
@@ -211,7 +215,7 @@ public class ExtendedAudioSystem
             audio_input_stream=AudioSystem.getAudioInputStream(format,audio_input_stream);
         }
         else
-        {  System.err.println("WARNING: Audio init error: target line is not open.");
+        {  Log.v(TAG, "WARNING: Audio init error: target line is not open.");
         }
 
         return audio_input_stream;
@@ -243,21 +247,15 @@ public class ExtendedAudioSystem
             {  audio_output_stream=new SourceLineAudioOutputStream(format,source_line);
             }
             catch (Exception e)
-            {  System.err.println("WARNING: Audio init error: impossible to get audio output stream from sorce line.");
+            {  Log.v(TAG, "WARNING: Audio init error: impossible to get audio output stream from sorce line.");
                 //e.printStackTrace();
             }
         }
         else
-        {  System.err.println("WARNING: Audio init error: source line is not open.");
+        {  Log.v(TAG, "WARNING: Audio init error: source line is not open.");
         }
 
         return audio_output_stream;
-    }
-
-
-    /** Debug output */
-    private static void printLog(String str)
-    {  System.err.println("ExtendedAudioSystem: "+str);
     }
 
 }

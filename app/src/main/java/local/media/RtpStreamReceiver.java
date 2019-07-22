@@ -51,19 +51,19 @@ public class RtpStreamReceiver extends Thread
     public static final int SO_TIMEOUT=200;
 
     /** The OutputStream */
-    OutputStream output_stream=null;
+    private OutputStream output_stream = null;
 
     /** The RtpSocket */
-    RtpSocket rtp_socket=null;
+    private RtpSocket rtp_socket = null;
 
     /** Whether the socket has been created here */
-    boolean socket_is_local_attribute=false;
+    private boolean socket_is_local_attribute = false;
 
     /** Remote socket address */
-    SocketAddress remote_soaddr=null;
+    private SocketAddress remote_soaddr = null;
 
     /** Whether it is running */
-    boolean running=false;
+    private boolean running = false;
 
     /** Packet drop rate (actually it is the inverse of the packet drop rate) */
     protected int packet_drop_rate=0;
@@ -122,10 +122,10 @@ public class RtpStreamReceiver extends Thread
 
     /** Inits the RtpStreamReceiver.
      * @param output_stream the stream sink
-     * @param socket the local receiver UdpSocket
+     * @param udp_socket the local receiver UdpSocket
      * @listener the RtpStreamReceiver listener */
-    private void init(OutputStream output_stream, UdpSocket udp_socket, RtpStreamReceiverListener listener)
-    {  this.output_stream=output_stream;
+    private void init(OutputStream output_stream, UdpSocket udp_socket, RtpStreamReceiverListener listener) {
+        this.output_stream=output_stream;
         this.listener=listener;
         if (udp_socket!=null) rtp_socket=new RtpSocket(udp_socket);
     }
@@ -151,43 +151,42 @@ public class RtpStreamReceiver extends Thread
 
 
     /** Runs it in a new Thread. */
-    public void run()
-    {
-        if (rtp_socket==null)
-        {  if (DEBUG) println("ERROR: RTP socket is null");
+    public void run() {
+        if (rtp_socket==null) {
+            if (DEBUG) println("ERROR: RTP socket is null");
             return;
         }
-        //else
 
-        byte[] buffer=new byte[BUFFER_SIZE];
-        RtpPacket rtp_packet=new RtpPacket(buffer,0);
+        byte[] buffer = new byte[BUFFER_SIZE];
+        RtpPacket rtp_packet = new RtpPacket(buffer,0);
 
-        running=true;
+        running = true;
 
         if (DEBUG) println("RTP: localhost:"+rtp_socket.getUdpSocket().getLocalPort()+" <-- remotesocket");
         if (DEBUG) println("RTP: receiving pkts of MAXIMUM "+buffer.length+" bytes");
 
-        try
-        {  rtp_socket.getUdpSocket().setSoTimeout(SO_TIMEOUT);
-            long early_drop_to=(EARLY_DROP_TIME>0)? System.currentTimeMillis()+EARLY_DROP_TIME : -1;
-            while (running)
-            {  try
-            {  // read a block of data from the rtp socket
-                rtp_socket.receive(rtp_packet);
-                // drop the first packets in order to reduce the effect of an eventual initial packet burst
-                if (early_drop_to>0 && System.currentTimeMillis()<early_drop_to) continue; else early_drop_to=-1;
+        try {
+            rtp_socket.getUdpSocket().setSoTimeout(SO_TIMEOUT);
+            long early_drop_to = (EARLY_DROP_TIME>0)? System.currentTimeMillis()+EARLY_DROP_TIME : -1;
+            while (running) {
+                try {
+                    // read a block of data from the rtp socket
+                    rtp_socket.receive(rtp_packet);
+                    // drop the first packets in order to reduce the effect of an eventual initial packet burst
+                    if (early_drop_to>0 && System.currentTimeMillis()<early_drop_to) continue; else early_drop_to=-1;
 
-                // write this block to the output_stream (only if still running..)
-                if (running) write(output_stream,rtp_packet.getPacket(),rtp_packet.getHeaderLength(),rtp_packet.getPayloadLength());
+                    // write this block to the output_stream (only if still running..)
+                    if (running)
+                        write(output_stream, rtp_packet.getPacket(), rtp_packet.getHeaderLength(), rtp_packet.getPayloadLength());
 
-                // check if remote socket address is changed
-                String addr=rtp_socket.getRemoteAddress().toString();
-                int port=rtp_socket.getRemotePort();
-                if (remote_soaddr==null || !remote_soaddr.getAddress().toString().equals(addr) || remote_soaddr.getPort()!=port)
-                {  remote_soaddr=new SocketAddress(addr,port);
-                    if (listener!=null) listener.onRemoteSoAddressChanged(this,remote_soaddr);
+                    // check if remote socket address is changed
+                    String addr=rtp_socket.getRemoteAddress().toString();
+                    int port=rtp_socket.getRemotePort();
+                    if (remote_soaddr == null || !remote_soaddr.getAddress().toString().equals(addr) || remote_soaddr.getPort()!=port) {
+                        remote_soaddr = new SocketAddress(addr,port);
+                        if (listener != null) listener.onRemoteSoAddressChanged(this,remote_soaddr);
+                    }
                 }
-            }
             catch (InterruptedIOException e) { }
             }
         }

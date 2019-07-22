@@ -1,20 +1,24 @@
 package com.pole.sippin;
 
+import android.media.*;
+import android.os.Build;
 import android.util.Log;
-import local.media.*;
-import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioFormat;
-import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioInputStream;
-import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioSystem;
+import local.media.FlowSpec;
+import local.media.MediaApp;
+import local.media.MediaSpec;
+
 import org.zoolu.net.SocketAddress;
 import org.zoolu.net.UdpSocket;
-import org.zoolu.sound.AudioOutputStream;
-import org.zoolu.sound.ExtendedAudioSystem;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+//import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioFormat;
+//import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioInputStream;
+//import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioSystem;
+//import org.zoolu.sound.AudioOutputStream;
+//import org.zoolu.sound.ExtendedAudioSystem;
+//import org.zoolu.sound.ExtendedAudioSystem;
+//import local.media.RtpStreamReceiver;
 
-public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
+public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListener {
 
     private static final String TAG = "Sip: AndroidAudioApp" ;
     
@@ -46,37 +50,30 @@ public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
     private static int TONE_SAMPLE_SIZE = 8;
 
     /** Audio format */
-    AudioFormat audio_format;
+    private AudioFormat audio_format_in;
+    private AudioFormat audio_format_out;
 
     /** Stream direction */
     FlowSpec.Direction dir;
 
     /** UDP socket */
-    UdpSocket socket=null;
+    UdpSocket socket = null;
 
     /** RtpStreamSender */
-    RtpStreamSender sender=null;
+    private AndroidRtpStreamSender sender = null;
     /** RtpStreamReceiver */
-    RtpStreamReceiver receiver=null;
+    private AndroidRtpStreamReceiver receiver = null;
 
     /** Whether using system audio capture */
-    boolean audio_input=false;
+    boolean audio_input = false;
     /** Whether using system audio playout */
-    boolean audio_output=false;
+    boolean audio_output = false;
 
     /** Whether using symmetric_rtp */
-    boolean symmetric_rtp=SYMMETRIC_RTP;
+    boolean symmetric_rtp = SYMMETRIC_RTP;
 
     /** Creates a new AndroidAudioApp */
-    public AndroidAudioApp(RtpStreamSender sender, RtpStreamReceiver receiver, boolean symmetric_rtp) {
-        this.sender=sender;
-        this.receiver=receiver;
-        this.symmetric_rtp=symmetric_rtp;
-        Log.v(TAG,"codec: [unknown]");
-    }
-
-    /** Creates a new AndroidAudioApp */
-    public AndroidAudioApp(FlowSpec flow_spec, String audiofile_in, String audiofile_out, boolean direct_convertion, boolean do_sync, int red_rate, boolean symmetric_rtp) {
+    public AndroidAudioApp(FlowSpec flow_spec, boolean do_sync, int red_rate, boolean symmetric_rtp) {
         MediaSpec audio_spec=flow_spec.getMediaSpec();
 
         this.dir=flow_spec.getDirection();
@@ -93,14 +90,16 @@ public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
         String remote_addr = flow_spec.getRemoteAddress();
 
         // 1) in case not defined, use default values
-        if (codec==null) codec=DEFAULT_CODEC;
+        if (codec == null) codec = DEFAULT_CODEC;
         if (payload_type<0) payload_type=DEFAULT_PAYLOAD_TYPE;
         if (sample_rate<=0) sample_rate=DEFAULT_SAMPLE_RATE;
         if (packet_size<=0) packet_size=DEFAULT_PACKET_SIZE;
 
+        int encoding = AudioFormat.ENCODING_DEFAULT;
+
         // 2) codec name translation
-        codec=codec.toUpperCase();
-        String codec_orig=codec;
+        codec = codec.toUpperCase();
+        String codec_orig = codec;
 
         switch (codec) {
             case "PCMU":
@@ -116,20 +115,14 @@ public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
                 codec = "G711_ALAW";
                 break;
             case "G726-24":
-                codec = "G726_24";
-                break;
-            case "G726-32":
-                codec = "G726_32";
-                break;
-            case "G726-40":
-                codec = "G726_40";
-                break;
             case "ADPCM24":
                 codec = "G726_24";
                 break;
+            case "G726-32":
             case "ADPCM32":
                 codec = "G726_32";
                 break;
+            case "G726-40":
             case "ADPCM40":
                 codec = "G726_40";
                 break;
@@ -142,154 +135,131 @@ public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
         if (!codec.equals(codec_orig)) Log.v(TAG, "codec mapped to: "+codec);
 
         // 3) frame_size, frame_rate, packet_rate
-        int frame_size=DEFAULT_FRAME_SIZE;
-        int frame_rate=DEFAULT_FRAME_RATE;
+        int frame_size = DEFAULT_FRAME_SIZE;
+        int frame_rate = DEFAULT_FRAME_RATE;
 
-        if (codec.equals("ULAW") || codec.equals("G711_ULAW"))
-        {  payload_type=0;
-            frame_size=1;
-            frame_rate=sample_rate;
-        }
-        else
-        if (codec.equals("ALAW") || codec.equals("G711_ALAW"))
-        {  payload_type=8;
-            frame_size=1;
-            frame_rate=sample_rate;
-        }
-        else
-        if (codec.equals("G726_24"))
-        {  payload_type=101;
-            frame_size=3;
-            frame_rate=sample_rate/8;
-        }
-        else
-        if (codec.equals("G726_32"))
-        {  payload_type=101;
-            frame_size=4;
-            frame_rate=sample_rate/8;
-        }
-        else
-        if (codec.equals("G726_40"))
-        {  payload_type=101;
-            frame_size=5;
-            frame_rate=sample_rate/8;
-        }
-        else
-        if (codec.equals("GSM0610"))
-        {  payload_type=3;
-            frame_size=33;
-            frame_rate=sample_rate/160; // = 50 frames/sec in case of sample rate = 8000 Hz
+
+        switch (codec) {
+            case "ULAW":
+            case "G711_ULAW":
+                payload_type = 0;
+                frame_size = 1;
+                frame_rate = sample_rate;
+                break;
+            case "ALAW":
+            case "G711_ALAW":
+                payload_type = 8;
+                frame_size = 1;
+                frame_rate = sample_rate;
+                break;
+            case "G726_24":
+                payload_type = 101;
+                frame_size = 3;
+                frame_rate = sample_rate / 8;
+                break;
+            case "G726_32":
+                payload_type = 101;
+                frame_size = 4;
+                frame_rate = sample_rate / 8;
+                break;
+            case "G726_40":
+                payload_type = 101;
+                frame_size = 5;
+                frame_rate = sample_rate / 8;
+                break;
+            case "GSM0610":
+                payload_type = 3;
+                frame_size = 33;
+                frame_rate = sample_rate / 160; // = 50 frames/sec in case of sample rate = 8000 Hz
+
+                break;
         }
 
-        int packet_rate=frame_rate*frame_size/packet_size;
-        Log.v(TAG, "packet size: "+packet_size);
-        Log.v(TAG, "packet rate: "+packet_rate);
+
+        int packet_rate = frame_rate * frame_size / packet_size;
+        Log.v(TAG, "packet size: " + packet_size);
+        Log.v(TAG, "packet rate: " + packet_rate);
 
         // 4) find the proper supported AudioFormat
-        Log.v(TAG, "base audio format: "+ ExtendedAudioSystem.getBaseAudioFormat().toString());
-        AudioFormat.Encoding encoding=null;
-        AudioFormat.Encoding[] supported_encodings= AudioSystem.getTargetEncodings(ExtendedAudioSystem.getBaseAudioFormat());
-        for (int i=0; i<supported_encodings.length ; i++)
-        {  if (supported_encodings[i].toString().equalsIgnoreCase(codec))
-        {  encoding=supported_encodings[i];
-            break;
-        }
-        }
-        if (encoding!=null)
-        {  // get the first available target format
-            AudioFormat[] available_formats=AudioSystem.getTargetFormats(encoding,ExtendedAudioSystem.getBaseAudioFormat());
-            audio_format=available_formats[0];
-            Log.v(TAG, "encoding audio format: "+audio_format);
-            //Log.v(TAG, "DEBUG: frame_size: "+audio_format.getFrameSize());
-            //Log.v(TAG, "DEBUG: frame_rate: "+audio_format.getFrameRate());
-            //Log.v(TAG, "DEBUG: big_endian: "+audio_format.isBigEndian());
-        }
-        else Log.v(TAG, "WARNING: codec '"+codec+"' not natively supported");
+//        Log.v(TAG, "base audio format: " + ExtendedAudioSystem.getBaseAudioFormat().toString());
+//        AudioFormat.Encoding encoding = null;
+//        AudioFormat.Encoding[] supported_encodings= AudioSystem.getTargetEncodings(ExtendedAudioSystem.getBaseAudioFormat());
+//        for (AudioFormat.Encoding supported_encoding : supported_encodings) {
+//            if (supported_encoding.toString().equalsIgnoreCase(codec)) {
+//                encoding = supported_encoding;
+//                break;
+//            }
+//        }
+//        if (encoding!=null) {
+//            // get the first available target format
+//            AudioFormat[] available_formats = AudioSystem.getTargetFormats(encoding,ExtendedAudioSystem.getBaseAudioFormat());
+//            audio_format_in = available_formats[0];
+//            Log.v(TAG, "encoding audio format: "+audio_format_in);
+//            //Log.v(TAG, "DEBUG: frame_size: "+audio_format_in.getFrameSize());
+//            //Log.v(TAG, "DEBUG: frame_rate: "+audio_format_in.getFrameRate());
+//            //Log.v(TAG, "DEBUG: big_endian: "+audio_format_in.isBigEndian());
+//        }
+//        else Log.v(TAG, "WARNING: codec '"+codec+"' not natively supported");
 
-        try
-        {  // 5) udp socket
-            socket=new UdpSocket(local_port);
+
+        // Build AudioFomat
+        if(Build.VERSION.SDK_INT >= 21) {
+            audio_format_in = new AudioFormat.Builder().setSampleRate(sample_rate).setEncoding(AudioFormat.ENCODING_PCM_16BIT).
+                    setChannelMask(AudioFormat.CHANNEL_IN_MONO).build();
+
+            audio_format_out = new AudioFormat.Builder().setSampleRate(sample_rate).setEncoding(AudioFormat.ENCODING_PCM_16BIT).
+                    setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build();
+        }
+
+        try {
+            // 5) udp socket
+            socket = new UdpSocket(local_port);
 
             // 6) sender
-            if ((dir==FlowSpec.SEND_ONLY || dir==FlowSpec.FULL_DUPLEX))
-            {  Log.v(TAG, "new audio sender to "+remote_addr+":"+remote_port);
-                if (audiofile_in!=null && audiofile_in.equals(AndroidAudioApp.TONE))
-                {  // tone generator
-                    Log.v(TAG, "Tone generator: "+TONE_FREQ+" Hz");
-                    ToneInputStream tone=new ToneInputStream(TONE_FREQ,TONE_AMP, sample_rate, TONE_SAMPLE_SIZE, ToneInputStream.PCM_LINEAR_UNSIGNED,DEFAULT_BIG_ENDIAN);
-                    // sender
-                    sender=new RtpStreamSender(tone,true,payload_type,packet_rate,packet_size,socket,remote_addr,remote_port);
+            if (dir == FlowSpec.SEND_ONLY || dir == FlowSpec.FULL_DUPLEX) {
+
+                Log.v(TAG, "new audio sender to " + remote_addr + ":" + remote_port);
+
+                AudioRecord audio_record;
+                if(Build.VERSION.SDK_INT >= 23) {
+                    audio_record = new AudioRecord.Builder()
+                            .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+                            .setAudioFormat(audio_format_in)
+                            .setBufferSizeInBytes(8000)
+                            .build();
+                } else {
+                    audio_record = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, 8000,
+                    AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, 8000);
                 }
-                else
-                if (audiofile_in!=null)
-                {  // input file
-                    File file=new File(audiofile_in);
-                    if (audiofile_in.indexOf(".wav")==(audiofile_in.length()-4))
-                    {  // known file format
-                        Log.v(TAG, "File audio format: " + AudioSystem.getAudioFileFormat(file));
-                        // get AudioInputStream
-                        AudioInputStream audio_input_stream = AudioSystem.getAudioInputStream(file);
-                        // apply audio conversion
-                        if (audio_format!=null) audio_input_stream=AudioSystem.getAudioInputStream(audio_format,audio_input_stream);
-                        // sender
-                        sender=new RtpStreamSender(audio_input_stream,true,payload_type,packet_rate,packet_size,socket,remote_addr,remote_port);
-                    }
-                    else
-                    {  // sender
-                        sender=new RtpStreamSender(new FileInputStream(file),true,payload_type,packet_rate,packet_size,socket,remote_addr,remote_port);
-                    }
-                }
-                else
-                {  // javax sound
-                    AudioInputStream audio_input_stream=null;
-                    if (!direct_convertion || codec.equalsIgnoreCase("ULAW") || codec.equalsIgnoreCase("ALAW"))
-                    {  // use embedded conversion provider
-                        audio_input_stream=ExtendedAudioSystem.getInputStream(audio_format);
-                    }
-                    else
-                    {  // use explicit conversion provider
-                        Class audio_system=Class.forName("com.zoopera.sound.ConverterAudioSystem");
-                        java.lang.reflect.Method get_input_stream=audio_system.getMethod("convertAudioInputStream",new Class[]{ String.class, float.class, AudioInputStream.class });
-                        audio_input_stream=(AudioInputStream)get_input_stream.invoke(null,new Object[]{ codec, new Integer(sample_rate), ExtendedAudioSystem.getInputStream(ExtendedAudioSystem.getBaseAudioFormat()) });
-                        Log.v(TAG, "send x-format: "+audio_input_stream.getFormat());
-                    }
-                    // sender
-                    if (!do_sync) sender=new RtpStreamSender(audio_input_stream,false,payload_type,packet_rate,packet_size,socket,remote_addr,remote_port);
-                    else sender=new RtpStreamSender(audio_input_stream,true,payload_type,packet_rate,packet_size,socket,remote_addr,remote_port);
-                    //if (sync_adj>0) sender.setSyncAdj(sync_adj);
-                    audio_input=true;
-                }
+
+                // sender
+                sender = new AndroidRtpStreamSender(audio_record, do_sync, payload_type, packet_rate, packet_size, socket, remote_addr, remote_port);
+                audio_input=true;
             }
 
             // 7) receiver
-            if (dir==FlowSpec.RECV_ONLY || dir==FlowSpec.FULL_DUPLEX)
-            {  Log.v(TAG, "new audio receiver on "+local_port);
-                if (audiofile_out!=null)
-                {  // output file
-                    File file=new File(audiofile_out);
-                    FileOutputStream output_stream=new FileOutputStream(file);
-                    // receiver
-                    receiver=new RtpStreamReceiver(output_stream,socket);
+            if (dir == FlowSpec.RECV_ONLY || dir == FlowSpec.FULL_DUPLEX) {
+                Log.v(TAG, "new audio receiver on "+local_port);
+
+                AudioTrack audio_track;
+                if(Build.VERSION.SDK_INT >= 21) {
+
+                    AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build();
+
+                    audio_track = new AudioTrack(audioAttributes, audio_format_out, 8000 /* 1 second buffer */,
+                            AudioTrack.MODE_STREAM, 0);
+
+                } else {
+                    audio_track = new AudioTrack(AudioManager.STREAM_VOICE_CALL, 8000, AudioFormat.CHANNEL_OUT_MONO,
+                            AudioFormat.ENCODING_PCM_16BIT, 8000 /* 1 second buffer */,
+                            AudioTrack.MODE_STREAM);
                 }
-                else
-                {  // javax sound
-                    AudioOutputStream audio_output_stream=null;
-                    if (!direct_convertion || codec.equalsIgnoreCase("ULAW") || codec.equalsIgnoreCase("ALAW"))
-                    {  // use embedded conversion provider
-                        audio_output_stream=ExtendedAudioSystem.getOutputStream(audio_format);
-                    }
-                    else
-                    {  // use explicit conversion provider
-                        Class audio_system=Class.forName("com.zoopera.sound.ConverterAudioSystem");
-                        java.lang.reflect.Method get_output_stream=audio_system.getMethod("convertAudioOutputStream",new Class[]{ String.class, float.class, AudioOutputStream.class });
-                        audio_output_stream=(AudioOutputStream)get_output_stream.invoke(null,new Object[]{ codec, new Integer(sample_rate), ExtendedAudioSystem.getOutputStream(ExtendedAudioSystem.getBaseAudioFormat()) });
-                        Log.v(TAG, "recv x-format: "+audio_output_stream.getFormat());
-                    }
-                    // receiver
-                    receiver=new RtpStreamReceiver(audio_output_stream,socket,this);
-                    receiver.setRED(red_rate);
-                    audio_output=true;
-                }
+
+                // receiver
+                receiver = new AndroidRtpStreamReceiver(audio_track, socket,this);
+                receiver.setRED(red_rate);
+                audio_output=true;
             }
         } catch (Exception e) {
             Log.e(TAG, "", e);
@@ -298,15 +268,15 @@ public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
     
     @Override
     public boolean startApp() {
-        Log.v(TAG, "starting java audio");
-        if (sender!=null)
-        {  Log.v(TAG, "start sending");
-            if (audio_input) ExtendedAudioSystem.startAudioInputLine();
+        Log.v(TAG, "starting Android audio");
+        if (sender != null) {
+            Log.v(TAG, "start sending");
+//            if (audio_input) ExtendedAudioSystem.startAudioInputLine();
             sender.start();
         }
-        if (receiver!=null)
-        {  Log.v(TAG, "start receiving");
-            if (audio_output) ExtendedAudioSystem.startAudioOutputLine();
+        if (receiver!=null) {
+            Log.v(TAG, "start receiving");
+//            if (audio_output) ExtendedAudioSystem.startAudioOutputLine();
             receiver.start();
         }
         return true;
@@ -314,23 +284,23 @@ public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
 
     @Override
     public boolean stopApp() {
-        Log.v(TAG, "stopping java audio");
-        if (sender!=null)
-        {  sender.halt();
-            sender=null;
+        Log.v(TAG, "stopping Android audio");
+        if (sender != null) {
+            sender.halt();
+            sender = null;
             Log.v(TAG, "sender halted");
         }
-        if (audio_input) ExtendedAudioSystem.stopAudioInputLine();
+//        if (audio_input) ExtendedAudioSystem.stopAudioInputLine();
 
-        if (receiver!=null)
-        {  receiver.halt();
-            receiver=null;
+        if (receiver != null) {
+            receiver.halt();
+            receiver = null;
             Log.v(TAG, "receiver halted");
         }
-        if (audio_output) ExtendedAudioSystem.stopAudioOutputLine();
+//        if (audio_output) ExtendedAudioSystem.stopAudioOutputLine();
 
         // try to take into account the resilience of RtpStreamSender
-        try { Thread.sleep(RtpStreamReceiver.SO_TIMEOUT); } catch (Exception e) {
+        try { Thread.sleep(AndroidRtpStreamReceiver.SO_TIMEOUT); } catch (Exception e) {
             Log.e(TAG, "", e);
         }
         socket.close();
@@ -350,7 +320,7 @@ public class AndroidAudioApp implements MediaApp, RtpStreamReceiverListener {
 
 
     /** From RtpStreamReceiverListener. When the remote socket address (source) is changed. */
-    public void onRemoteSoAddressChanged(RtpStreamReceiver rr, SocketAddress remote_soaddr)
-    {  if (symmetric_rtp && sender!=null) sender.setRemoteSoAddress(remote_soaddr);
+    public void onRemoteSoAddressChanged(AndroidRtpStreamReceiver rr, SocketAddress remote_soaddr) {
+        if (symmetric_rtp && sender!=null) sender.setRemoteSoAddress(remote_soaddr);
     }
 }
