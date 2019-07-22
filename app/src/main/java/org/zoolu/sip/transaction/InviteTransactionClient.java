@@ -24,6 +24,7 @@
 package org.zoolu.sip.transaction;
 
 
+import android.util.Log;
 import org.zoolu.sip.provider.*;
 import org.zoolu.sip.message.*;
 import org.zoolu.tools.Timer;
@@ -127,11 +128,13 @@ public class InviteTransactionClient extends TransactionClient {
         }
             return;
         }
-        if (code>=200 && code<300 && (statusIs(STATE_TRYING) || statusIs(STATE_PROCEEDING)))
-        {  doTerminate();
-            if (transaction_listener!=null) transaction_listener.onTransSuccessResponse(this,msg);
-            transaction_listener=null;
-            return;
+
+        if (code >= 200 && code < 300 && (statusIs(STATE_TRYING) || statusIs(STATE_PROCEEDING)) ) {
+            doTerminate();
+            if (transaction_listener != null) {
+                transaction_listener.onTransSuccessResponse(this, msg);
+                transaction_listener = null;
+            }
         }
     }
     }

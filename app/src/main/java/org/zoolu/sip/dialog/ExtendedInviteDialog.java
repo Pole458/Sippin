@@ -297,24 +297,20 @@ public class ExtendedInviteDialog extends InviteDialog
 
     /** Inherited from TransactionClientListener.
      * When an TransactionClientListener goes into the "Terminated" state, receiving a 2xx response  */
-    public void onTransSuccessResponse(TransactionClient t, Message msg)
-    {
-        attempts=0;
-        String method=t.getTransactionMethod();
-        StatusLine status_line=msg.getStatusLine();
-        int code=status_line.getCode();
-        String reason=status_line.getReason();
+    public void onTransSuccessResponse(TransactionClient t, Message msg) {
+        attempts = 0;
+        String method = t.getTransactionMethod();
+        StatusLine status_line = msg.getStatusLine();
+        int code = status_line.getCode();
+        String reason = status_line.getReason();
 
-        if (method.equals(SipMethods.INVITE) || method.equals(SipMethods.CANCEL) || method.equals(SipMethods.BYE))
-        {  super.onTransSuccessResponse(t,msg);
-        }
-        else
-        if (t.getTransactionMethod().equals(SipMethods.REFER))
-        {  transactions.remove(t.getTransactionId());
+        if (method.equals(SipMethods.INVITE) || method.equals(SipMethods.CANCEL) || method.equals(SipMethods.BYE)) {
+            super.onTransSuccessResponse(t,msg);
+        } else if (t.getTransactionMethod().equals(SipMethods.REFER)) {
+            transactions.remove(t.getTransactionId());
             if (ext_listener!=null) ext_listener.onDlgReferResponse(this,code,reason,msg);
-        }
-        else
-        {  String body=msg.getBody();
+        } else {
+            String body=msg.getBody();
             transactions.remove(t.getTransactionId());
             if (ext_listener!=null) ext_listener.onDlgAltResponse(this,method,code,reason,body,msg);
         }

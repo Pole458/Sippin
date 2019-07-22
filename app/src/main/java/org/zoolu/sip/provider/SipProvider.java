@@ -915,9 +915,13 @@ public class SipProvider implements Configurable, TransportListener {
         // pass requests to transaction servers and response to transaction clients
         if (msg.isRequest()) key=msg.getTransactionServerId(); else key=msg.getTransactionClientId();
         Log.v(TAG, "transaction-id: "+key);
-        if (sip_listeners.containsKey(key))
-        {  Log.v(TAG, "message passed to transaction: "+key);
-            ((SipProviderListener)sip_listeners.get(key)).onReceivedMessage(this,msg);
+        if (sip_listeners.containsKey(key)) {
+            Log.v(TAG, "message passed to transaction: "+key);
+            SipProviderListener lis = (SipProviderListener) sip_listeners.get(key);
+            if(lis != null) {
+                Log.v(TAG, lis.getClass().toString());
+                lis.onReceivedMessage(this, msg);
+            }
             return;
         }
         // try to look for a dialog

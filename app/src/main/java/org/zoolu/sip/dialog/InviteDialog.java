@@ -24,6 +24,7 @@
 package org.zoolu.sip.dialog;
 
 
+import android.util.Log;
 import org.zoolu.sip.address.*;
 import org.zoolu.sip.transaction.*;
 import org.zoolu.sip.message.*;
@@ -621,34 +622,33 @@ public class InviteDialog extends Dialog implements TransactionClientListener, I
      * <p>
      * If called for a BYE transaction, it moves to D_CLOSE state,
      * removes the listener from SipProvider, and fires <i>onClose(this,msg)</i>. */
-    public void onTransSuccessResponse(TransactionClient tc, Message msg)
-    {
-        if (tc.getTransactionMethod().equals(SipMethods.INVITE))
-        {  if (!(statusIs(D_INVITING)||statusIs(D_ReINVITING))) return;
-            StatusLine statusline=msg.getStatusLine();
-            int code=statusline.getCode();
-            if (code>=200 && code <300 && msg.getTransactionMethod().equals(SipMethods.INVITE)) return;
-            boolean re_inviting=statusIs(D_ReINVITING);
+    public void onTransSuccessResponse(TransactionClient tc, Message msg) {
+        if (tc.getTransactionMethod().equals(SipMethods.INVITE)) {
+            if (!(statusIs(D_INVITING) || statusIs(D_ReINVITING))) return;
+            StatusLine statusline = msg.getStatusLine();
+            int code = statusline.getCode();
+            // todo removed this in order to start the call
+//            if (code >= 200 && code < 300 && msg.getTransactionMethod().equals(SipMethods.INVITE)) {
+//                Log.v("Sip: InviteDialog", "Returning");
+//                return;
+//            }
+            boolean re_inviting = statusIs(D_ReINVITING);
             changeStatus(D_CALL);
-            update(Dialog.UAC,msg);
-            if (invite_offer)
-            {  //invite_req=MessageFactory.createRequest(SipMethods.ACK,dialog_state,sdp.toString());
+            update(Dialog.UAC, msg);
+            if (invite_offer) {
+                //invite_req=MessageFactory.createRequest(SipMethods.ACK,dialog_state,sdp.toString());
                 //ack=MessageFactory.createRequest(this,SipMethods.ACK,null);
-                ack_req=MessageFactory.create2xxAckRequest(this,null);
-                AckTransactionClient ack_tc=new AckTransactionClient(sip_provider,ack_req,null);
+                ack_req = MessageFactory.create2xxAckRequest(this,null);
+                AckTransactionClient ack_tc = new AckTransactionClient(sip_provider,ack_req,null);
                 ack_tc.request();
-            }
-            if (!re_inviting)
-            {  if (listener!=null) listener.onDlgInviteSuccessResponse(this,code,statusline.getReason(),msg.getBody(),msg);
+            } if (!re_inviting) {
+                if (listener!=null) listener.onDlgInviteSuccessResponse(this,code,statusline.getReason(),msg.getBody(),msg);
                 if (listener!=null) listener.onDlgCall(this);
+            } else {
+                if (listener!=null) listener.onDlgReInviteSuccessResponse(this,code,statusline.getReason(),msg.getBody(),msg);
             }
-            else
-            {  if (listener!=null) listener.onDlgReInviteSuccessResponse(this,code,statusline.getReason(),msg.getBody(),msg);
-            }
-        }
-        else
-        if (tc.getTransactionMethod().equals(SipMethods.BYE))
-        {  if (!(statusIs(D_BYEING))) return;
+        } else if (tc.getTransactionMethod().equals(SipMethods.BYE)) {
+            if (!(statusIs(D_BYEING))) return;
             StatusLine statusline=msg.getStatusLine();
             int code=statusline.getCode();
             changeStatus(D_CLOSE);

@@ -111,8 +111,8 @@ public abstract class Transaction extends org.zoolu.tools.MonitoredObject implem
     }
 
     /** Changes the internal status */
-    protected void changeStatus(int newstatus)
-    {  status=newstatus;
+    protected void changeStatus(int newstatus) {
+        status=newstatus;
         //transaction_listener.onChangedTransactionStatus(status);
         Log.v(TAG, "changed transaction state: "+getStatus());
     }
