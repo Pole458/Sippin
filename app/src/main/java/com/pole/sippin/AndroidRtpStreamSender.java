@@ -1,6 +1,7 @@
 package com.pole.sippin;
 
 import android.media.AudioRecord;
+import android.util.Log;
 import local.net.RtpPacket;
 import local.net.RtpSocket;
 import org.zoolu.net.IpAddress;
@@ -12,6 +13,8 @@ import org.zoolu.net.UdpSocket;
  * It takes media from a given AudioRecord and sends it through RTP packets to a remote destination.
  */
 public class AndroidRtpStreamSender extends Thread {
+
+    private static final String TAG = "Sip: AndrRtpStrmSender";
 
     /** The InputStream */
     private AudioRecord audio_record;
@@ -32,7 +35,7 @@ public class AndroidRtpStreamSender extends Thread {
     private int frame_size;
 
     /** Whether it works synchronously with a local clock, or it it acts as slave of the InputStream  */
-    private boolean do_sync = true;
+    private boolean do_sync;
 
     /** Synchronization correction value, in milliseconds.
      * It accellarates the sending rate respect to the nominal value,
@@ -55,7 +58,7 @@ public class AndroidRtpStreamSender extends Thread {
      * @param src_socket the socket used to send the RTP packet
      * @param dest_addr the destination address
      * @param dest_port the destination port */
-    public AndroidRtpStreamSender(AudioRecord audio_record, boolean do_sync, int payload_type, long frame_rate, int frame_size, UdpSocket src_socket, String dest_addr, int dest_port) {
+    AndroidRtpStreamSender(AudioRecord audio_record, boolean do_sync, int payload_type, long frame_rate, int frame_size, UdpSocket src_socket, String dest_addr, int dest_port) {
         this.audio_record = audio_record;
         this.p_type = payload_type;
         this.frame_rate = frame_rate;
@@ -78,7 +81,7 @@ public class AndroidRtpStreamSender extends Thread {
     }
 
     /** Changes the remote socket address. */
-    public void setRemoteSoAddress(SocketAddress remote_soaddr) {
+    void setRemoteSoAddress(SocketAddress remote_soaddr) {
         if (remote_soaddr!=null && rtp_socket!=null)
         try {
             rtp_socket=new RtpSocket(rtp_socket.getUdpSocket(),IpAddress.getByName(remote_soaddr.getAddress().toString()),remote_soaddr.getPort());
@@ -112,20 +115,20 @@ public class AndroidRtpStreamSender extends Thread {
     public void run() {
         if (rtp_socket == null || audio_record == null) return;
 
-        byte[] packet_buffer=new byte[12+frame_size];
-        RtpPacket rtp_packet=new RtpPacket(packet_buffer,0);
+        byte[] packet_buffer = new byte[12+frame_size];
+        RtpPacket rtp_packet = new RtpPacket(packet_buffer,0);
         rtp_packet.setHeader(p_type);
-        int seqn=0;
-        long time=0;
-        long start_time=System.currentTimeMillis();
-        long byte_rate=frame_rate*frame_size;
+        int seqn = 0;
+        long time = 0;
+        long start_time = System.currentTimeMillis();
+        long byte_rate = frame_rate*frame_size;
 
         audio_record.startRecording();
 
-        running=true;
+        running = true;
 
 //        if (DEBUG) println("RTP: localhost:"+rtp_socket.getUdpSocket().getLocalPort()+" --> "+rtp_socket.getRemoteAddress().toString()+":"+rtp_socket.getRemotePort());
-//        if (DEBUG) println("RTP: sending pkts of "+(packet_buffer.length-12)+" bytes of RTP payload");
+        Log.v(TAG, "RTP: sending packets of " + (packet_buffer.length-12) + " bytes of RTP payload");
 
         try {
             while (running) {
@@ -136,12 +139,11 @@ public class AndroidRtpStreamSender extends Thread {
                     rtp_packet.setPayloadLength(num);
                     rtp_socket.send(rtp_packet);
                     // update rtp timestamp (in milliseconds)
-                    long frame_time=(num*1000)/byte_rate;
-                    time+=frame_time;
+                    long frame_time = (num * 1000) / byte_rate;
+                    time += frame_time;
                     // wait for next departure
                     if (do_sync || sync_adj>0) {
                         // wait before next departure..
-                        //long sleep_time=frame_time;
                         long sleep_time = start_time + time - System.currentTimeMillis();
                         // compensate possible inter-time reduction due to the approximated time obtained by System.currentTimeMillis()
                         long min_time = frame_time / 2;
@@ -151,7 +153,7 @@ public class AndroidRtpStreamSender extends Thread {
                         if (sleep_time > 0) try {  Thread.sleep(sleep_time);  } catch (Exception e) {}
                     }
                 } else if (num < 0) {
-//                    if (DEBUG) println("Error reading from InputStream");
+                    Log.v(TAG,"Error reading from InputStream");
                     running = false;
                 }
             }
@@ -169,17 +171,16 @@ public class AndroidRtpStreamSender extends Thread {
         // free all
         audio_record = null;
         rtp_socket = null;
-
-//        if (DEBUG) println("rtp sender terminated");
     }
 
 
-    /** Reads a block of bytes from an InputStream and put it into a given buffer.
+    /** Reads a block of bytes from an AudioRecord and put it into a given buffer.
      * This method is used by the RtpStreamSender to compose RTP packets,
      * and can be re-defined by a class that extends RtpStreamSender in order to
      * implement new RTP encoding mechanisms.
      * @return It returns the number of bytes read. */
     protected int read(AudioRecord audio_record, byte[] buff, int off, int len) throws Exception {
-        return audio_record.read(buff,12,buff.length-12);
+        return audio_record.read(buff, off, len);
+//        return audio_record.read(buff,12,buff.length-12);
     }
 }

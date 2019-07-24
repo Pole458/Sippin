@@ -206,13 +206,13 @@ public class UserAgentProfile extends Configure {
      * However, an explicit re-synchronization is suggested
      * in order to let the read() method be non-blocking (in the other case
      * the MyUA audio performance seems decreasing. */
-    public boolean javax_sound_sync=true;
+    public boolean javax_sound_sync = true;
 
     /** Receiver random early drop (RED) rate. Actually it is the inverse of packet drop rate.
      * It can used to prevent long play back delay. 
-     * A value less or equal to 0 means that no packet dropping is explicitely
+     * A value less or equal to 0 means that no packet dropping is explicitly
      * performed at the RTP receiver. */
-    public int random_early_drop_rate=20;
+    public int random_early_drop_rate = 20;
 
     /** Fixed audio multicast socket address; if defined, it forces the use of this maddr+port for audio session */
     public SocketAddress audio_mcast_soaddr=null;

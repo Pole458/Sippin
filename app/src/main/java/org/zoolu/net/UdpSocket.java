@@ -24,6 +24,8 @@
 package org.zoolu.net;
 
 
+import android.util.Log;
+
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -84,15 +86,15 @@ public class UdpSocket {
     }
 
     /** Receives a datagram packet from this socket. */
-    public void receive(UdpPacket pkt) throws java.io.IOException
-    {  DatagramPacket dgram=pkt.getDatagramPacket();
+    public void receive(UdpPacket pkt) throws java.io.IOException {
+        DatagramPacket dgram = pkt.getDatagramPacket();
         socket.receive(dgram);
         pkt.setDatagramPacket(dgram);
     }
 
     /** Sends an UDP packet from this socket. */
-    public void send(UdpPacket pkt) throws java.io.IOException
-    {  socket.send(pkt.getDatagramPacket());
+    public void send(UdpPacket pkt) throws java.io.IOException {
+        socket.send(pkt.getDatagramPacket());
     }
 
     /** Converts this object to a String. */

@@ -53,12 +53,12 @@ class MediaAgent {
         // ################# patch to make audio working with javax.sound.. #################
         // currently ExtendedAudioSystem must be initialized before any AudioClipPlayer is initialized..
         // this is caused by a problem with the definition of the audio format
-        if (!ua_profile.use_rat && !ua_profile.use_jmf_audio) {
-            if (ua_profile.audio && !ua_profile.loopback && ua_profile.send_file==null && !ua_profile.recv_only && !ua_profile.send_tone)
-                org.zoolu.sound.ExtendedAudioSystem.initAudioInputLine();
-            if (ua_profile.audio && !ua_profile.loopback && ua_profile.recv_file==null && !ua_profile.send_only)
-                org.zoolu.sound.ExtendedAudioSystem.initAudioOutputLine();
-        }
+//        if (!ua_profile.use_rat && !ua_profile.use_jmf_audio) {
+//            if (ua_profile.audio && !ua_profile.loopback && ua_profile.send_file==null && !ua_profile.recv_only && !ua_profile.send_tone)
+//                org.zoolu.sound.ExtendedAudioSystem.initAudioInputLine();
+//            if (ua_profile.audio && !ua_profile.loopback && ua_profile.recv_file==null && !ua_profile.send_only)
+//                org.zoolu.sound.ExtendedAudioSystem.initAudioOutputLine();
+//        }
     }
 
     /** Starts a media session */
@@ -78,12 +78,14 @@ class MediaAgent {
         // start new media_app
         MediaApp media_app = null;
 
-        if (ua_profile.loopback)
-            media_app = new LoopbackMediaApp(flow_spec);
-        else if (flow_spec.getMediaSpec().getType().equals("audio"))
-            media_app = newAudioApp(flow_spec);
-        else if (flow_spec.getMediaSpec().getType().equals("video"))
-            media_app = newVideoApp(flow_spec);
+        media_app = newAudioApp(flow_spec);
+
+//        if (ua_profile.loopback)
+//            media_app = new LoopbackMediaApp(flow_spec);
+//        else if (flow_spec.getMediaSpec().getType().equals("audio"))
+//            media_app = newAudioApp(flow_spec);
+//        else if (flow_spec.getMediaSpec().getType().equals("video"))
+//            media_app = newVideoApp(flow_spec);
 
         if (media_app != null) {
             if (media_app.startApp()) {
@@ -116,55 +118,51 @@ class MediaAgent {
 
         MediaApp audio_app = null;
 
-        // audio input
-        String audio_in = null;
-        if (ua_profile.send_tone)
-            audio_in = AndroidAudioApp.TONE;
-        else if (ua_profile.send_file != null)
-            audio_in = ua_profile.send_file;
-        // audio output
-        String audio_out = null;
-        if (ua_profile.recv_file != null)
-            audio_out = ua_profile.recv_file;
+//        // audio input
+//        String audio_in = null;
+//        if (ua_profile.send_tone)
+//            audio_in = AndroidAudioApp.TONE;
+//        else if (ua_profile.send_file != null)
+//            audio_in = ua_profile.send_file;
+//        // audio output
+//        String audio_out = null;
+//        if (ua_profile.recv_file != null)
+//            audio_out = ua_profile.recv_file;
 
         // Android audio app
         if (ua_profile.javax_sound_app == null) {
-            audio_app = new AndroidAudioApp(audio_flow, ua_profile.javax_sound_sync,ua_profile.random_early_drop_rate,ua_profile.symmetric_rtp);
+            audio_app = new AndroidAudioApp(audio_flow, ua_profile.javax_sound_sync, ua_profile.random_early_drop_rate, ua_profile.symmetric_rtp);
         }
 
         return audio_app;
     }
 
     /** Creates a new video application. */
-    private MediaApp newVideoApp(FlowSpec video_flow) {
-
-        MediaApp video_app=null;
-
-      /*if (ua_profile.use_vic) {
-         // use VIC
-         if (ua_profile.video_mcast_soaddr!=null) video_flow=new FlowSpec(video_flow.getMediaSpec(),ua_profile.video_mcast_soaddr.getPort(),ua_profile.video_mcast_soaddr.getAddress().toString(),ua_profile.video_mcast_soaddr.getPort(),video_flow.getDirection());
-         video_app=new VicVideoApp(ua_profile.bin_vic,video_flow);
-      }
-      else if (ua_profile.use_jmf_video) {  // use JMF video app
-         try {
-
-            String video_source=(ua_profile.send_video_file!=null)? Archive.getFileURL(ua_profile.send_video_file).toString() : null;
-            if (ua_profile.recv_video_file!=null) Log.v(TAG, "WARNING: file destination is not supported with JMF video");
-            Class mediaapp_class=Class.forName("local.media.jmf.JmfMediaApp");
-            Class[] param_types={ FlowSpec.class, String.class, Log.class };
-            Object[] param_values={ video_flow, video_source };
-            java.lang.reflect.Constructor mediaapp_constructor= mediaapp_class.getConstructor(param_types);
-            video_app=(MediaApp)mediaapp_constructor.newInstance(param_values);
-
-         } catch (Exception e) {
-            Log.e(TAG, "ERROR trying to create the JmfMediaApp", e);
-         }
-      }*/
-        return video_app;
-    }
-
-
-    // ***************************** logs ****************************
-
+//    private MediaApp newVideoApp(FlowSpec video_flow) {
+//
+//        MediaApp video_app=null;
+//
+//      /*if (ua_profile.use_vic) {
+//         // use VIC
+//         if (ua_profile.video_mcast_soaddr!=null) video_flow=new FlowSpec(video_flow.getMediaSpec(),ua_profile.video_mcast_soaddr.getPort(),ua_profile.video_mcast_soaddr.getAddress().toString(),ua_profile.video_mcast_soaddr.getPort(),video_flow.getDirection());
+//         video_app=new VicVideoApp(ua_profile.bin_vic,video_flow);
+//      }
+//      else if (ua_profile.use_jmf_video) {  // use JMF video app
+//         try {
+//
+//            String video_source=(ua_profile.send_video_file!=null)? Archive.getFileURL(ua_profile.send_video_file).toString() : null;
+//            if (ua_profile.recv_video_file!=null) Log.v(TAG, "WARNING: file destination is not supported with JMF video");
+//            Class mediaapp_class=Class.forName("local.media.jmf.JmfMediaApp");
+//            Class[] param_types={ FlowSpec.class, String.class, Log.class };
+//            Object[] param_values={ video_flow, video_source };
+//            java.lang.reflect.Constructor mediaapp_constructor= mediaapp_class.getConstructor(param_types);
+//            video_app=(MediaApp)mediaapp_constructor.newInstance(param_values);
+//
+//         } catch (Exception e) {
+//            Log.e(TAG, "ERROR trying to create the JmfMediaApp", e);
+//         }
+//      }*/
+//        return video_app;
+//    }
 
 }

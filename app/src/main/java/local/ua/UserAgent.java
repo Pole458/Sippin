@@ -417,16 +417,17 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
 
             for (int i=0; i<media_descs.size() && media_spec==null; i++) {
                 MediaDesc media_desc=(MediaDesc)media_descs.elementAt(i);
-                if (media_desc.getMedia().equalsIgnoreCase(media))
-                {  Vector media_specs=media_desc.getMediaSpecs();
-                    for (int j=0; j<media_specs.size() && media_spec==null; j++)
-                    {  MediaSpec ms=(MediaSpec)media_specs.elementAt(j);
+                if (media_desc.getMedia().equalsIgnoreCase(media)) {
+                    Vector media_specs=media_desc.getMediaSpecs();
+                    for (int j=0; j<media_specs.size() && media_spec==null; j++) {
+                        MediaSpec ms=(MediaSpec)media_specs.elementAt(j);
                         if (ms.getAVP()==avp) media_spec=ms;
                     }
                 }
             }
+
             if (local_port!=0 && remote_port!=0 && media_spec!=null) {
-                FlowSpec flow_spec=new FlowSpec(media_spec,local_port,remote_address,remote_port,dir);
+                FlowSpec flow_spec = new FlowSpec(media_spec, local_port, remote_address, remote_port, dir);
                 Log.v(TAG, media+" format: "+flow_spec.getMediaSpec().getCodec());
                 boolean success=media_agent.startMediaSession(flow_spec);
                 if (success) {

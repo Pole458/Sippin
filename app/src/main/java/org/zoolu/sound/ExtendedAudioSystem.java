@@ -52,7 +52,7 @@ public class ExtendedAudioSystem {
     public static final int INTERNAL_BUFFER_SIZE=40960;
 
     /** Whether printing debugging information on standard error output. */
-    public static boolean DEBUG=true;
+    public static boolean DEBUG=false;
 
 
     /** Base system audio format (PCM 8000Hz, Linear, 16bit, Mono, Little endian). */
@@ -122,7 +122,7 @@ public class ExtendedAudioSystem {
         }
         catch (Exception e)
         {  Log.v(TAG, "ERROR: Exception when trying to init audio output at ExtendedAudioSystem: "+e.getMessage());
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -248,7 +248,7 @@ public class ExtendedAudioSystem {
             }
             catch (Exception e)
             {  Log.v(TAG, "WARNING: Audio init error: impossible to get audio output stream from sorce line.");
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
         else

@@ -1,6 +1,7 @@
 package com.pole.sippin;
 
 import android.media.AudioTrack;
+import android.util.Log;
 import local.net.RtpPacket;
 import local.net.RtpSocket;
 import org.zoolu.net.SocketAddress;
@@ -13,6 +14,8 @@ import java.io.InterruptedIOException;
  * It receives packets from RTP and writes it to the target AudioTrack.
  */
 public class AndroidRtpStreamReceiver extends Thread {
+
+    private static final String TAG = "Sip: AndrRtpStrmRec";
 
     /** Time waited before starting playing out packets (in millisecs). All packet received in the meantime are dropped in order to reduce the effect of an eventual initial packet burst. */
     public static final int EARLY_DROP_TIME = 200;
@@ -94,31 +97,41 @@ public class AndroidRtpStreamReceiver extends Thread {
 //        println("RTP: receiving pkts of MAXIMUM "+buffer.length+" bytes");
 
         try {
+
             rtp_socket.getUdpSocket().setSoTimeout(SO_TIMEOUT);
-            long early_drop_to = (EARLY_DROP_TIME>0)? System.currentTimeMillis()+EARLY_DROP_TIME : -1;
+
+            long early_drop_to = (EARLY_DROP_TIME > 0 )? System.currentTimeMillis() + EARLY_DROP_TIME : -1;
+
             while (running) {
                 try {
                     // read a block of data from the rtp socket
                     rtp_socket.receive(rtp_packet);
+
                     // drop the first packets in order to reduce the effect of an eventual initial packet burst
-                    if (early_drop_to>0 && System.currentTimeMillis()<early_drop_to) continue; else early_drop_to=-1;
+                    if (early_drop_to > 0 && System.currentTimeMillis() < early_drop_to) continue;
+                    else early_drop_to = -1;
 
                     // write this block to the output_stream (only if still running..)
                     if (running)
                         write(audio_track, rtp_packet.getPacket(), rtp_packet.getHeaderLength(), rtp_packet.getPayloadLength());
 
                     // check if remote socket address is changed
-                    String addr=rtp_socket.getRemoteAddress().toString();
-                    int port=rtp_socket.getRemotePort();
-                    if (remote_soaddr == null || !remote_soaddr.getAddress().toString().equals(addr) || remote_soaddr.getPort()!=port) {
-                        remote_soaddr = new SocketAddress(addr,port);
+                    String addr = rtp_socket.getRemoteAddress().toString();
+                    int port = rtp_socket.getRemotePort();
+                    if (remote_soaddr == null || !remote_soaddr.getAddress().toString().equals(addr) || remote_soaddr.getPort() != port) {
+                        remote_soaddr = new SocketAddress(addr, port);
                         if (listener != null) listener.onRemoteSoAddressChanged(this, remote_soaddr);
                     }
+
+                } catch (InterruptedIOException e) {
+                    e.printStackTrace();
                 }
-                catch (InterruptedIOException e) { }
             }
+
+        } catch (Exception e) {
+            running = false;
+            e.printStackTrace();
         }
-        catch (Exception e) {  running=false;  e.printStackTrace();  }
 
         // close RtpSocket and local UdpSocket
         UdpSocket udp_socket = rtp_socket.getUdpSocket();

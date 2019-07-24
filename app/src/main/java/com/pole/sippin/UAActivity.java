@@ -1,9 +1,11 @@
 package com.pole.sippin;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Looper;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -13,9 +15,9 @@ import local.ua.UserAgentProfile;
 import org.zoolu.sip.address.NameAddress;
 import org.zoolu.sip.provider.SipProvider;
 import org.zoolu.sip.provider.SipStack;
-////import org.zoolu.tools.ScheduledWork;
 
 import java.util.Vector;
+
 
 public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
@@ -65,6 +67,8 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         changeStatus(UA_IDLE);
 
         myNumberTextView.setText(ua_profile.getUserURI().toString());
+
+        requestRecordAudioPermission();
 //
 //        // Set the re-invite
 //        if (ua_profile.re_invite_time > 0)
@@ -86,7 +90,7 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 //            ua.unregister();
 //        }
 //
-//        // registers the contact URL with the registrar server
+        // registers the contact URL with the registrar server
 //        if (ua_profile.do_register) {
 ////            Log.v(TAG, "REGISTRATION");
 //            ua.loopRegister(ua_profile.expires,ua_profile.expires / 2, ua_profile.keepalive_time);
@@ -103,6 +107,32 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         hangUp();
     }
 
+    private void requestRecordAudioPermission() {
+        //check API version, do nothing if API version < 23!
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion > android.os.Build.VERSION_CODES.LOLLIPOP){
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+
+//                // Should we show an explanation?
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
+//
+//                    // Show an expanation to the user *asynchronously* -- don't block
+//                    // this thread waiting for the user's response! After the user
+//                    // sees the explanation, try again to request the permission.
+//
+//                } else {
+//
+//                    // No explanation needed, we can request the permission.
+//
+//                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+//                }
+            }
+        }
+    }
+
     /** When the call/accept button is pressed. */
     private void call(String url) {
 
@@ -112,13 +142,10 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
                 new Thread() {
                     @Override
                     public void run() {
-                        Log.v(TAG, "Is this ui thread? " + (Looper.myLooper() == Looper.getMainLooper()));
                         ua.hangup();
                         ua.call(url);
                     }
-                }.start();
-//                ua.hangup();
-//                ua.call(url);
+                }.start();;
                 changeStatus(UA_OUTGOING_CALL);
             }
         } else if (call_state == UA_INCOMING_CALL) {
@@ -128,7 +155,6 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
                     ua.accept();
                 }
             }.start();
-//            ua.accept();
             changeStatus(UA_ON_CALL);
         }
     }
@@ -136,7 +162,12 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
     /** When the refuse/hangup button is pressed. */
     private void hangUp() {
         if (call_state != UA_IDLE) {
-            ua.hangup();
+            new Thread() {
+                @Override
+                public void run() {
+                    ua.hangup();
+                }
+            }.start();
             changeStatus(UA_IDLE);
         }
     }

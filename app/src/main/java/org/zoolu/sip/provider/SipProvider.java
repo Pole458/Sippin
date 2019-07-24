@@ -596,7 +596,7 @@ public class SipProvider implements Configurable, TransportListener {
             sip_listeners.remove(key);
         }
         sip_listeners.put(key,listener);
-        Log.v(TAG, "active sip listeners: "+sip_listeners.size());
+//        Log.v(TAG, "active sip listeners: "+sip_listeners.size());
     }
 
 
@@ -611,7 +611,7 @@ public class SipProvider implements Configurable, TransportListener {
         else
         {  sip_listeners.remove(key);
         }
-        Log.v(TAG, "active sip listeners: "+sip_listeners.size());
+//        Log.v(TAG, "active sip listeners: "+sip_listeners.size());
     }
 
 
@@ -949,7 +949,7 @@ public class SipProvider implements Configurable, TransportListener {
         // if we are here, no listener_ID matched..
         Log.v(TAG, "no listener found matching that message: message discarded.");
         //Log.v(TAG, "Pending SipProviderListeners= "+getListeners().size(),3);
-        Log.v(TAG, "active listeners: "+sip_listeners.size());
+//        Log.v(TAG, "active listeners: "+sip_listeners.size());
     }
     catch (Exception exception)
     {  Log.v(TAG,"Error handling a new incoming message");
