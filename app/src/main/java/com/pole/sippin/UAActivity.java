@@ -2,6 +2,8 @@ package com.pole.sippin;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +24,8 @@ import java.util.Vector;
 public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     private static final String TAG = "Sip: UAActivity";
+
+    private static final String addres = "<sip:alice@192.168.1.14:5070>";
 
     // ********************** UserAgent logic **********************
 
@@ -66,6 +70,20 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         ua = new UserAgent(sip_provider, ua_profile,this);
         changeStatus(UA_IDLE);
 
+//        WifiManager wifiMgr = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+//        if(wifiMgr != null) {
+//            WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
+//            int ip = wifiInfo.getIpAddress();
+//            String ipString = String.format(
+//                    "%d.%d.%d.%d",
+//                    (ip & 0xff),
+//                    (ip >> 8 & 0xff),
+//                    (ip >> 16 & 0xff),
+//                    (ip >> 24 & 0xff));
+//        }
+
+
+        numberTextView.setText(addres);
         myNumberTextView.setText(ua_profile.getUserURI().toString());
 
         requestRecordAudioPermission();
@@ -188,21 +206,23 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     /** Changes the call state */
     private void changeStatus(int state) {
-        call_state = state;
-        switch (state) {
-            case UA_IDLE:
-                statusTextView.setText("Idle");
-                break;
-            case UA_INCOMING_CALL:
-                statusTextView.setText("Incoming Call");
-                break;
-            case UA_OUTGOING_CALL:
-                statusTextView.setText("Outgoing Call");
-                break;
-            case UA_ON_CALL:
-                statusTextView.setText("On Call");
-                break;
-        }
+        runOnUiThread(() ->    {
+            call_state = state;
+            switch (state) {
+                case UA_IDLE:
+                    statusTextView.setText("Idle");
+                    break;
+                case UA_INCOMING_CALL:
+                    statusTextView.setText("Incoming Call");
+                    break;
+                case UA_OUTGOING_CALL:
+                    statusTextView.setText("Outgoing Call");
+                    break;
+                case UA_ON_CALL:
+                    statusTextView.setText("On Call");
+                    break;
+            }
+        });
     }
 
     /** Gets the call state */

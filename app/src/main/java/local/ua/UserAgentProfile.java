@@ -356,7 +356,7 @@ public class UserAgentProfile extends Configure {
         if (proxy != null && user != null)
             return new NameAddress(display_name, new SipURL(user, proxy));
         else
-            return new NameAddress(display_name,new SipURL(user, ua_address));
+            return new NameAddress(display_name, new SipURL(user, ua_address));
     }
 
     /** Sets the user's AOR (Address Of Record) registered to the registrar server

@@ -7,6 +7,7 @@ import local.media.FlowSpec;
 import local.media.MediaApp;
 import local.media.MediaSpec;
 
+import mg.dida.javax.sound.share.classes.javax.sound.sampled.TargetDataLine;
 import org.zoolu.net.SocketAddress;
 import org.zoolu.net.UdpSocket;
 
@@ -40,7 +41,7 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
     private static final boolean DEFAULT_BIG_ENDIAN = false;
 
     /** Test tone */
-    public static final String TONE="TONE";
+    public static final String TONE = "TONE";
     /** Test tone frequency [Hz] */
     private static int TONE_FREQ = 100;
     /** Test tone ampliture (from 0.0 to 1.0) */
@@ -84,6 +85,11 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
         int sample_rate = audio_spec.getSampleRate();
         int packet_size = audio_spec.getPacketSize();
 
+//        Log.v(TAG, "Received coded: " + codec);
+//        Log.v(TAG, "Received payload_type: " + payload_type);
+//        Log.v(TAG, "Received sample_rate: " + sample_rate);
+//        Log.v(TAG, "Received packet_size: " + packet_size);
+
         int local_port = flow_spec.getLocalPort();
         int remote_port = flow_spec.getRemotePort();
 
@@ -91,7 +97,7 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
 
         // 1) in case not defined, use default values
         if (codec == null) codec = DEFAULT_CODEC;
-        if (payload_type < 0) payload_type =DEFAULT_PAYLOAD_TYPE;
+        if (payload_type < 0) payload_type = DEFAULT_PAYLOAD_TYPE;
         if (sample_rate <= 0) sample_rate = DEFAULT_SAMPLE_RATE;
         if (packet_size <= 0) packet_size = DEFAULT_PACKET_SIZE;
 
@@ -131,8 +137,8 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
                 break;
         }
 
-        Log.v(TAG, "codec: " + codec_orig);
-        if (!codec.equals(codec_orig)) Log.v(TAG, "codec mapped to: " + codec);
+//        Log.v(TAG, "codec: " + codec_orig);
+//        if (!codec.equals(codec_orig)) Log.v(TAG, "codec mapped to: " + codec);
 
         // 3) frame_size, frame_rate, packet_rate
         int frame_size = DEFAULT_FRAME_SIZE;
@@ -170,18 +176,17 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
                 payload_type = 3;
                 frame_size = 33;
                 frame_rate = sample_rate / 160; // = 50 frames/sec in case of sample rate = 8000 Hz
-
                 break;
         }
 
-        frame_size = 2;
+//        frame_size = 2;
 
         int packet_rate = frame_rate * frame_size / packet_size;
-        packet_size = 160;
-        Log.v(TAG, "frame rate: " + frame_rate);
-        Log.v(TAG, "frame size: " + frame_size);
-        Log.v(TAG, "packet size: " + packet_size);
-        Log.v(TAG, "packet rate: " + packet_rate);
+//        packet_size = 160;
+//        Log.v(TAG, "frame rate: " + frame_rate);
+//        Log.v(TAG, "frame size: " + frame_size);
+//        Log.v(TAG, "packet size: " + packet_size);
+//        Log.v(TAG, "packet rate: " + packet_rate);
 
         // 4) find the proper supported AudioFormat
 //        Log.v(TAG, "base audio format: " + ExtendedAudioSystem.getBaseAudioFormat().toString());
@@ -205,7 +210,7 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
 //        else Log.v(TAG, "WARNING: codec '" + codec + "' not natively supported");
 
 
-        // Build AudioFomat
+        // Build AudioFormat
         if(Build.VERSION.SDK_INT >= 21) {
 
             audio_format_in = new AudioFormat.Builder().setSampleRate(sample_rate).setEncoding(AudioFormat.ENCODING_PCM_16BIT).
@@ -218,6 +223,9 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
         try {
             // 5) udp socket
             socket = new UdpSocket(local_port);
+//            socket = new UdpSocket(0);
+//            local_port = socket.getLocalPort();
+//            Log.v(TAG, "LocalPort: " + local_port);
 
             // 6) sender
             if (dir == FlowSpec.SEND_ONLY || dir == FlowSpec.FULL_DUPLEX) {
@@ -270,7 +278,7 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
                 audio_output = true;
             }
         } catch (Exception e) {
-            Log.e(TAG, "", e);
+            Log.e(TAG, e.getMessage(), e);
         }
     }
     
@@ -317,19 +325,19 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
     }
 
     /** Sets symmetric RTP mode. */
-    public void setSymmetricRtp(boolean symmetric_rtp)
-    {  this.symmetric_rtp=symmetric_rtp;
+    public void setSymmetricRtp(boolean symmetric_rtp) {
+        this.symmetric_rtp=symmetric_rtp;
     }
 
 
     /** whether symmetric RTP mode is set. */
-    public boolean isSymmetricRtp()
-    {  return symmetric_rtp;
+    public boolean isSymmetricRtp() {
+        return symmetric_rtp;
     }
 
 
     /** From RtpStreamReceiverListener. When the remote socket address (source) is changed. */
     public void onRemoteSoAddressChanged(AndroidRtpStreamReceiver rr, SocketAddress remote_soaddr) {
-        if (symmetric_rtp && sender!=null) sender.setRemoteSoAddress(remote_soaddr);
+        if (symmetric_rtp && sender != null) sender.setRemoteSoAddress(remote_soaddr);
     }
 }

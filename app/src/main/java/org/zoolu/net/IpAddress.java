@@ -23,6 +23,7 @@
 
 package org.zoolu.net;
 
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import java.net.Inet4Address;
@@ -35,6 +36,8 @@ import java.util.Enumeration;
 /** IpAddress is an IP address.
  */
 public class IpAddress {
+
+    public static final String TAG = "Sip: IpAddress";
 
     /** The host address/name */
     private String address;
@@ -108,15 +111,15 @@ public class IpAddress {
     public static IpAddress getLocalHostAddress() {
 
         try {
+
             Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
             while (networks.hasMoreElements()) {
                 Enumeration<InetAddress> iaddrs = networks.nextElement().getInetAddresses();
                 while (iaddrs.hasMoreElements()) {
                     InetAddress iaddr = iaddrs.nextElement();
-                    if(!iaddr.isLoopbackAddress() && iaddr instanceof Inet4Address)
+                    if(!iaddr.isLoopbackAddress() && iaddr instanceof Inet4Address && isPrivateIP(iaddr.getHostAddress()))
                         return new IpAddress(iaddr);
                 }
-
             }
 
         } catch (SocketException e) {
@@ -126,5 +129,29 @@ public class IpAddress {
 
         return null;
 
+    }
+
+    private static boolean isPrivateIP(String ipAddress) {
+        boolean isValid = false;
+
+        if (ipAddress != null && !ipAddress.isEmpty()) {
+            String[] ip = ipAddress.split("\\.");
+            short[] ipNumber = new short[] {
+                    Short.parseShort(ip[0]),
+                    Short.parseShort(ip[1]),
+                    Short.parseShort(ip[2]),
+                    Short.parseShort(ip[3])
+            };
+
+            /*if (ipNumber[0] == 10) { // Class A
+                isValid = true;
+            } else if (ipNumber[0] == 172 && (ipNumber[1] >= 16 && ipNumber[1] <= 31)) { // Class B
+                isValid = true;
+            } else*/ if (ipNumber[0] == 192 && ipNumber[1] == 168) { // Class C
+                isValid = true;
+            }
+        }
+
+        return isValid;
     }
 }

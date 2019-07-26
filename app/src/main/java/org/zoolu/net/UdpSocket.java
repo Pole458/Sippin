@@ -40,11 +40,6 @@ public class UdpSocket {
     DatagramSocket socket;
 
 
-    /** Creates a new void UdpSocket */
-    protected UdpSocket() {
-        socket=null;
-    }
-
     /** Creates a new UdpSocket */
     public UdpSocket(int port) throws java.net.SocketException {
         socket = new DatagramSocket(port);
@@ -100,7 +95,7 @@ public class UdpSocket {
     /** Converts this object to a String. */
     public String toString()
     {  //return socket.toString();
-        return "UDP:"+getLocalAddress()+":"+getLocalPort();
+        return "UDP: " + getLocalAddress() + ":" + getLocalPort();
     }
 
 }

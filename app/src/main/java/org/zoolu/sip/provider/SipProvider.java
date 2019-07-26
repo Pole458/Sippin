@@ -919,7 +919,7 @@ public class SipProvider implements Configurable, TransportListener {
             Log.v(TAG, "message passed to transaction: "+key);
             SipProviderListener lis = (SipProviderListener) sip_listeners.get(key);
             if(lis != null) {
-                Log.v(TAG, lis.getClass().toString());
+//                Log.v(TAG, lis.getClass().toString());
                 lis.onReceivedMessage(this, msg);
             }
             return;

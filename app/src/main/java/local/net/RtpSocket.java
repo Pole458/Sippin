@@ -37,18 +37,15 @@ import java.io.IOException;
 public class RtpSocket
 {
     /** UDP socket */
-    //DatagramSocket udp_socket;
-    UdpSocket udp_socket;
+    private UdpSocket udp_socket;
 
     /** Remote address */
-    //InetAddress remote_addr;
-    IpAddress remote_addr;
+    private IpAddress remote_addr;
 
     /** Remote port */
-    int remote_port;
+    private int remote_port;
 
     /** Creates a new RTP socket (only receiver) */
-    //public RtpSocket(DatagramSocket udp_socket)
     public RtpSocket(UdpSocket udp_socket)
     {  this.udp_socket=udp_socket;
         this.remote_addr=null;
@@ -56,7 +53,6 @@ public class RtpSocket
     }
 
     /** Creates a new RTP socket (sender and receiver) */
-    //public RtpSocket(DatagramSocket udp_socket, InetAddress remote_address, int remote_port)
     public RtpSocket(UdpSocket udp_socket, IpAddress remote_address, int remote_port)
     {  this.udp_socket=udp_socket;
         this.remote_addr=remote_address;
@@ -64,46 +60,42 @@ public class RtpSocket
     }
 
     /** Gets the UDP socket */
-    //public DatagramSocket getDatagramSocket()
     public UdpSocket getUdpSocket()
     {  return udp_socket;
     }
 
     /** Gets the remote IP address */
-    //public InetAddress getRemoteAddress()
     public IpAddress getRemoteAddress()
     {  return remote_addr;
     }
 
     /** Gets the remote port */
-    public int getRemotePort()
-    {  return remote_port;
+    public int getRemotePort() {
+        return remote_port;
     }
 
     /** Receives a RTP packet from this socket */
-    public void receive(RtpPacket rtpp) throws IOException
-    {  //DatagramPacket udp_packet=new DatagramPacket(rtpp.packet,rtpp.packet.length);
-        UdpPacket udp_packet=new UdpPacket(rtpp.packet,rtpp.packet.length);
+    public void receive(RtpPacket rtpp) throws IOException {
+        UdpPacket udp_packet = new UdpPacket(rtpp.packet, rtpp.packet.length);
         udp_socket.receive(udp_packet);
-        rtpp.packet_len=udp_packet.getLength();
-        //remote_addr=udp_packet.getAddress();
-        remote_addr=udp_packet.getIpAddress();
-        remote_port=udp_packet.getPort();
+        rtpp.packet_len = udp_packet.getLength();
+        remote_addr = udp_packet.getIpAddress();
+        remote_port = udp_packet.getPort();
     }
 
     /** Sends a RTP packet from this socket */
-    public void send(RtpPacket rtpp) throws IOException
-    {  //DatagramPacket udp_packet=new DatagramPacket(rtpp.packet,rtpp.packet_len);
-        UdpPacket udp_packet=new UdpPacket(rtpp.packet,rtpp.packet_len);
-        //udp_packet.setAddress(remote_addr);
+    public void send(RtpPacket rtpp) throws IOException {
+        UdpPacket udp_packet = new UdpPacket(rtpp.packet, rtpp.packet_len);
         udp_packet.setIpAddress(remote_addr);
         udp_packet.setPort(remote_port);
+//        udp_packet.setIpAddress(udp_socket.getLocalAddress());
+//        udp_packet.setPort(udp_socket.getLocalPort());
         udp_socket.send(udp_packet);
     }
 
     /** Closes this socket */
-    public void close()
-    {  //udp_socket.close();
+    public void close() {
+        //udp_socket.close();
     }
 
 }

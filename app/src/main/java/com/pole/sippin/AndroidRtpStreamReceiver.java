@@ -18,22 +18,19 @@ public class AndroidRtpStreamReceiver extends Thread {
     private static final String TAG = "Sip: AndrRtpStrmRec";
 
     /** Time waited before starting playing out packets (in millisecs). All packet received in the meantime are dropped in order to reduce the effect of an eventual initial packet burst. */
-    public static final int EARLY_DROP_TIME = 200;
+    private static final int EARLY_DROP_TIME = 200;
 
     /** Size of the read buffer */
-    public static final int BUFFER_SIZE = 32768;
+    private static final int BUFFER_SIZE = 32768;
 
     /** Maximum blocking time, spent waiting for reading new bytes [milliseconds] */
-    public static final int SO_TIMEOUT = 200;
+    static final int SO_TIMEOUT = 200;
 
     /** The OutputStream */
     private AudioTrack audio_track;
 
     /** The RtpSocket */
     private RtpSocket rtp_socket = null;
-
-    /** Whether the socket has been created here */
-    private boolean socket_is_local_attribute = false;
 
     /** Remote socket address */
     private SocketAddress remote_soaddr = null;
@@ -42,29 +39,28 @@ public class AndroidRtpStreamReceiver extends Thread {
     private boolean running = false;
 
     /** Packet drop rate (actually it is the inverse of the packet drop rate) */
-    private int packet_drop_rate=0;
+    private int packet_drop_rate = 0;
 
-    /** Packet counter (incremented only if packet_drop_rate>0) */
-    private int packet_counter=0;
+    /** Packet counter (incremented only if packet_drop_rate > 0) */
+    private int packet_counter = 0;
 
     /** Listener */
     private AndroidRtpStreamReceiverListener listener;
-
 
     /** Constructs a AndroidRtpStreamReceiver.
      * @param audio_track the stream sink
      * @param udp_socket the local receiver UdpSocket
      * @listener the RtpStreamReceiver listener */
-    public AndroidRtpStreamReceiver(AudioTrack audio_track, UdpSocket udp_socket, AndroidRtpStreamReceiverListener listener) {
+    AndroidRtpStreamReceiver(AudioTrack audio_track, UdpSocket udp_socket, AndroidRtpStreamReceiverListener listener) {
         this.audio_track = audio_track;
         this.listener = listener;
         if (udp_socket != null)
-            rtp_socket=new RtpSocket(udp_socket);
+            rtp_socket = new RtpSocket(udp_socket);
     }
 
     /** Gets the local port. */
     public int getLocalPort() {
-        if (rtp_socket!=null) return rtp_socket.getUdpSocket().getLocalPort();
+        if (rtp_socket != null) return rtp_socket.getUdpSocket().getLocalPort();
         else return 0;
     }
 
@@ -75,14 +71,14 @@ public class AndroidRtpStreamReceiver extends Thread {
 
     /** Stops running */
     public void halt() {
-        audio_track.stop();
-        running=false;
+        running = false;
     }
 
     /** Runs it in a new Thread. */
     public void run() {
+
         if (rtp_socket == null) {
-//           println("ERROR: RTP socket is null");
+            Log.e(TAG, "RTP socket is null");
             return;
         }
 
@@ -93,8 +89,8 @@ public class AndroidRtpStreamReceiver extends Thread {
 
         running = true;
 
-//        println("RTP: localhost:"+rtp_socket.getUdpSocket().getLocalPort()+" <-- remotesocket");
-//        println("RTP: receiving pkts of MAXIMUM "+buffer.length+" bytes");
+        Log.v(TAG,"RTP: localhost: " + rtp_socket.getUdpSocket().getLocalPort() + " <-- remotesocket");
+        Log.v(TAG,"RTP: receiving pkts of MAXIMUM " + buffer.length + " bytes");
 
         try {
 
@@ -103,9 +99,12 @@ public class AndroidRtpStreamReceiver extends Thread {
             long early_drop_to = (EARLY_DROP_TIME > 0 )? System.currentTimeMillis() + EARLY_DROP_TIME : -1;
 
             while (running) {
+
                 try {
                     // read a block of data from the rtp socket
                     rtp_socket.receive(rtp_packet);
+
+                    Log.v(TAG, "Received audio packet");
 
                     // drop the first packets in order to reduce the effect of an eventual initial packet burst
                     if (early_drop_to > 0 && System.currentTimeMillis() < early_drop_to) continue;
@@ -124,31 +123,30 @@ public class AndroidRtpStreamReceiver extends Thread {
                     }
 
                 } catch (InterruptedIOException e) {
-                    e.printStackTrace();
+//                    Log.e(TAG, e.getMessage(), e.getCause());
                 }
             }
 
         } catch (Exception e) {
             running = false;
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e.getCause());
         }
 
         // close RtpSocket and local UdpSocket
         UdpSocket udp_socket = rtp_socket.getUdpSocket();
         rtp_socket.close();
-        if (socket_is_local_attribute && udp_socket!=null) udp_socket.close();
+        if (udp_socket != null) udp_socket.close();
 
         // free all
+        audio_track.stop();
         audio_track = null;
         rtp_socket = null;
-
-//        println("rtp receiver terminated");
     }
 
 
     /** Sets the random early drop (RED) rate. Actually it sets the inverse of the packet drop rate. */
-    public void setRED(int rate) {
-        this.packet_drop_rate=rate;
+    void setRED(int rate) {
+        this.packet_drop_rate = rate;
     }
 
 
@@ -160,19 +158,18 @@ public class AndroidRtpStreamReceiver extends Thread {
 
     /** Writes a block of bytes to an InputStream taken from a given buffer.
      * This method is used by the RtpStreamReceiver to process incoming RTP packets,
-     * and can be re-defined by a class that extends RtpStreamReceiver in order to
+     * and can be re-defined by a class that extends AndroidRtpStreamReceiver in order to
      * implement new RTP decoding mechanisms. */
     protected void write(AudioTrack audio_track, byte[] buff, int off, int len) throws Exception {
-        if (packet_drop_rate>0 && (++packet_counter)%packet_drop_rate==0) return;
+        if (packet_drop_rate > 0 && (++packet_counter) % packet_drop_rate == 0) return;
         audio_track.write(buff, off, len);
     }
 
-
     public static int byte2int(byte b) {
-        return (b+0x100)%0x100;
+        return (b + 0x100) % 0x100;
     }
 
     public static int byte2int(byte b1, byte b2) {
-        return (((b1+0x100)%0x100)<<8)+(b2+0x100)%0x100;
+        return (((b1 + 0x100) % 0x100) << 8) + (b2 + 0x100) % 0x100;
     }
 }

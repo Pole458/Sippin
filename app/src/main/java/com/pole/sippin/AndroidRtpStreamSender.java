@@ -84,7 +84,7 @@ public class AndroidRtpStreamSender extends Thread {
     void setRemoteSoAddress(SocketAddress remote_soaddr) {
         if (remote_soaddr!=null && rtp_socket!=null)
         try {
-            rtp_socket=new RtpSocket(rtp_socket.getUdpSocket(),IpAddress.getByName(remote_soaddr.getAddress().toString()),remote_soaddr.getPort());
+            rtp_socket = new RtpSocket(rtp_socket.getUdpSocket(),IpAddress.getByName(remote_soaddr.getAddress().toString()),remote_soaddr.getPort());
         }
         catch (Exception e) {  e.printStackTrace();  }
     }
@@ -108,7 +108,6 @@ public class AndroidRtpStreamSender extends Thread {
     /** Stops running */
     public void halt() {
         running = false;
-        audio_record.stop();
     }
 
     /** Runs it in a new Thread. */
@@ -127,7 +126,7 @@ public class AndroidRtpStreamSender extends Thread {
 
         running = true;
 
-//        if (DEBUG) println("RTP: localhost:"+rtp_socket.getUdpSocket().getLocalPort()+" --> "+rtp_socket.getRemoteAddress().toString()+":"+rtp_socket.getRemotePort());
+        Log.v(TAG,"RTP: localhost:"+rtp_socket.getUdpSocket().getLocalPort()+" --> "+rtp_socket.getRemoteAddress().toString()+":"+rtp_socket.getRemotePort());
         Log.v(TAG, "RTP: sending packets of " + (packet_buffer.length-12) + " bytes of RTP payload");
 
         try {
@@ -164,11 +163,12 @@ public class AndroidRtpStreamSender extends Thread {
         //if (DEBUG) println("real time: "+(System.currentTimeMillis()-start_time));
 
         // close RtpSocket and local UdpSocket
-        UdpSocket socket=rtp_socket.getUdpSocket();
+        UdpSocket socket = rtp_socket.getUdpSocket();
         rtp_socket.close();
         if (socket_is_local_attribute && socket!=null) socket.close();
 
         // free all
+        audio_record.stop();
         audio_record = null;
         rtp_socket = null;
     }

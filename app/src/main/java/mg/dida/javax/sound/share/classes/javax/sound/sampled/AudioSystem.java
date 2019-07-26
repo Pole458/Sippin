@@ -72,7 +72,7 @@ import mg.dida.javax.sound.share.classes.javax.sound.sampled.spi.MixerProvider;
  * following table lists the available property keys and which methods
  * consider them:
  *
- * <table border=0>
+ * <table border=0>f
  *  <tr>
  *   <th>Property Key</th>
  *   <th>Interface</th>
@@ -950,8 +950,7 @@ public class AudioSystem {
 	 * @see #isConversionSupported(AudioFormat, AudioFormat)
 	 * @see #getAudioInputStream(AudioFormat.Encoding, AudioInputStream)
 	 */
-	public static AudioInputStream getAudioInputStream(AudioFormat targetFormat,
-			AudioInputStream sourceStream) {
+	public static AudioInputStream getAudioInputStream(AudioFormat targetFormat, AudioInputStream sourceStream) {
 
 		if (sourceStream.getFormat().matches(targetFormat)) {
 			return sourceStream;
