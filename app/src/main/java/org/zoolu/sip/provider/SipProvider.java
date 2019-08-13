@@ -268,6 +268,7 @@ public class SipProvider implements Configurable, TransportListener {
 
         this.via_addr = via_addr;
         if (host_port<=0) host_port=SipStack.default_port;
+        if (host_port<=0) host_port=SipStack.default_port;
         this.host_port=host_port;
         rport=SipStack.use_rport;
         force_rport=SipStack.force_rport;

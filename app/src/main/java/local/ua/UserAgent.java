@@ -47,7 +47,7 @@ import java.util.Vector;
  */
 public class UserAgent extends CallListenerAdapter implements CallWatcherListener, RegistrationClientListener, TimerListener {
 
-    private static final String TAG = "Sip: User Agent";
+    private static final String TAG = "Sip:UserAgent";
 
     // ***************************** attributes ****************************
 
@@ -414,6 +414,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
             String format = (String)md.getFormatList().elementAt(0);
             int avp = Integer.parseInt(format);
             MediaSpec media_spec=null;
+
 
             for (int i=0; i<media_descs.size() && media_spec==null; i++) {
                 MediaDesc media_desc=(MediaDesc)media_descs.elementAt(i);

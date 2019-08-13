@@ -15,7 +15,7 @@ import java.io.InterruptedIOException;
  */
 public class AndroidRtpStreamReceiver extends Thread {
 
-    private static final String TAG = "Sip: AndrRtpStrmRec";
+    private static final String TAG = "Sip:AndrRtpStrmRec";
 
     /** Time waited before starting playing out packets (in millisecs). All packet received in the meantime are dropped in order to reduce the effect of an eventual initial packet burst. */
     private static final int EARLY_DROP_TIME = 200;
@@ -103,8 +103,6 @@ public class AndroidRtpStreamReceiver extends Thread {
                 try {
                     // read a block of data from the rtp socket
                     rtp_socket.receive(rtp_packet);
-
-                    Log.v(TAG, "Received audio packet");
 
                     // drop the first packets in order to reduce the effect of an eventual initial packet burst
                     if (early_drop_to > 0 && System.currentTimeMillis() < early_drop_to) continue;

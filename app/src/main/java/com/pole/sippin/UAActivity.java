@@ -25,7 +25,7 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     private static final String TAG = "Sip: UAActivity";
 
-    private static final String addres = "<sip:alice@192.168.1.14:5070>";
+    private static final String addres = "<sip:alice@192.168.1.13:5070>";
 
     // ********************** UserAgent logic **********************
 

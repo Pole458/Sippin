@@ -14,7 +14,7 @@ import org.zoolu.net.UdpSocket;
  */
 public class AndroidRtpStreamSender extends Thread {
 
-    private static final String TAG = "Sip: AndrRtpStrmSender";
+    private static final String TAG = "Sip:AndrRtpStrmSender";
 
     /** The InputStream */
     private AudioRecord audio_record;
