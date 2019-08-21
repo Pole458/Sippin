@@ -21,6 +21,7 @@
 
 package local.ua;
 
+import android.net.rtp.AudioStream;
 import android.util.Log;
 
 import local.media.*;
@@ -32,6 +33,7 @@ import org.zoolu.sdp.*;
 import org.zoolu.net.SocketAddress;
 import org.zoolu.tools.*;
 
+import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -48,6 +50,8 @@ import java.util.Vector;
 public class UserAgent extends CallListenerAdapter implements CallWatcherListener, RegistrationClientListener, TimerListener {
 
     private static final String TAG = "Sip:UserAgent";
+
+    private AudioStream audioStream;
 
     // ***************************** attributes ****************************
 
@@ -101,6 +105,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     /** Creates a new MyUA. */
     public UserAgent(SipProvider sip_provider, UserAgentProfile ua_profile, UserAgentListener listener) {
 
+
         this.sip_provider=sip_provider;
         this.listener=listener;
         this.ua_profile=ua_profile;
@@ -122,6 +127,21 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     }
 
     // ************************** private methods **************************
+
+
+    public int getAudioStreamPort() {
+        if(audioStream == null) startAudioStream();
+        return audioStream.getLocalPort();
+    }
+
+    private void startAudioStream() {
+        try {
+            audioStream = new AudioStream(InetAddress.getByName(ua_profile.getUserURI().getAddress().getHost()));
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+    }
+
 
     /** Inits the RegistrationClient */
     private void initRegistrationClient() {
@@ -275,7 +295,6 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
             media_descs = ua_profile.media_descs;
         this.media_descs = media_descs;
         // new call
-        Log.v(TAG, "DEBUG: auth_user = " + ua_profile.auth_user + "@" + ua_profile.auth_realm);
         call = new ExtendedCall(sip_provider,ua_profile.getUserURI(),ua_profile.auth_user,ua_profile.auth_realm,ua_profile.auth_passwd,this);
         if(ua_profile.no_offer)
             call.call(callee);
@@ -376,7 +395,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     // ********************** protected methods **********************
 
     /** Starts media sessions (audio and/or video). */
-    private void startMediaSessions() {
+    private void startMediaSessions(AudioStream audioStream) {
 
         // exit if the media application is already running
         if (media_sessions.size() > 0) {
@@ -430,7 +449,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
             if (local_port!=0 && remote_port!=0 && media_spec!=null) {
                 FlowSpec flow_spec = new FlowSpec(media_spec, local_port, remote_address, remote_port, dir);
                 Log.v(TAG, media+" format: "+flow_spec.getMediaSpec().getCodec());
-                boolean success=media_agent.startMediaSession(flow_spec);
+                boolean success=media_agent.startMediaSession(flow_spec, audioStream);
                 if (success) {
                     media_sessions.addElement(media);
                     if (listener!=null)
@@ -560,7 +579,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
 
         if (listener!=null) listener.onUaCallAccepted(this);
 
-        startMediaSessions();
+        startMediaSessions(audioStream);
 
         if (call==call_transfer)
         {  this.call.notify(resp);
@@ -574,7 +593,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
         if (call!=this.call) {  Log.v(TAG, "NOT the current call");  return;  }
         Log.v(TAG, "CONFIRMED/CALL");
 
-        startMediaSessions();
+        startMediaSessions(audioStream);
     }
 
 

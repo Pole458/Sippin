@@ -1,26 +1,28 @@
 package com.pole.sippin;
 
 import android.media.*;
+import android.media.audiofx.NoiseSuppressor;
+import android.net.rtp.AudioCodec;
+import android.net.rtp.AudioGroup;
+import android.net.rtp.AudioStream;
+import android.net.rtp.RtpStream;
 import android.os.Build;
 import android.util.Log;
-import local.media.FlowSpec;
-import local.media.MediaApp;
-import local.media.MediaSpec;
+import local.media.*;
 
 import org.zoolu.net.SocketAddress;
 import org.zoolu.net.UdpSocket;
 
-//import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioFormat;
-//import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioInputStream;
-//import mg.dida.javax.sound.share.classes.javax.sound.sampled.AudioSystem;
-//import org.zoolu.sound.AudioOutputStream;
-//import org.zoolu.sound.ExtendedAudioSystem;
-//import local.media.RtpStreamReceiver;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListener {
+public class AndroidAudioApp implements MediaApp, AndroidReceiverListener {
 
     private static final String TAG = "Sip:AndroidAudioApp" ;
-    
+
+    private AudioStream audioStream;
+    private AudioGroup audioGroup;
+
     /** Whether using symmetric RTP by default */
     private static final boolean SYMMETRIC_RTP = false;
 
@@ -48,10 +50,6 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
     /** Test tone sample size [bits] */
     private static int TONE_SAMPLE_SIZE = 8;
 
-    /** Audio format */
-    private AudioFormat audio_format_in;
-    private AudioFormat audio_format_out;
-
     /** Stream direction */
     FlowSpec.Direction dir;
 
@@ -59,9 +57,9 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
     UdpSocket socket = null;
 
     /** RtpStreamSender */
-    private AndroidRtpStreamSender sender = null;
+    private AndroidSender sender = null;
     /** RtpStreamReceiver */
-    private AndroidRtpStreamReceiver receiver = null;
+    private AndroidReceiver receiver = null;
 
     /** Whether using system audio capture */
     boolean audio_input = false;
@@ -72,7 +70,9 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
     boolean symmetric_rtp = SYMMETRIC_RTP;
 
     /** Creates a new AndroidAudioApp */
-    public AndroidAudioApp(FlowSpec flow_spec, boolean do_sync, int red_rate, boolean symmetric_rtp) {
+    public AndroidAudioApp(FlowSpec flow_spec, boolean do_sync, int red_rate, boolean symmetric_rtp, AudioStream audioStream) {
+
+        this.audioStream = audioStream;
 
         MediaSpec audio_spec = flow_spec.getMediaSpec();
 
@@ -96,8 +96,6 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
         if (payload_type < 0) payload_type = DEFAULT_PAYLOAD_TYPE;
         if (sample_rate <= 0) sample_rate = DEFAULT_SAMPLE_RATE;
         if (packet_size <= 0) packet_size = DEFAULT_PACKET_SIZE;
-
-        int encoding = AudioFormat.ENCODING_DEFAULT;
 
         // 2) codec name translation
         codec = codec.toUpperCase();
@@ -139,6 +137,8 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
         // 3) frame_size, frame_rate, packet_rate
         int frame_size = DEFAULT_FRAME_SIZE;
         int frame_rate = DEFAULT_FRAME_RATE;
+
+//        sample_rate = 16000;
 
         switch (codec) {
             case "ULAW":
@@ -199,131 +199,168 @@ public class AndroidAudioApp implements MediaApp, AndroidRtpStreamReceiverListen
 //        }
 //        else Log.v(TAG, "WARNING: codec '" + codec + "' not natively supported");
 
+        int encoding = AudioFormat.ENCODING_PCM_8BIT;
+//        sample_rate = 8000;
 
-        // Build AudioFormat
-        if(Build.VERSION.SDK_INT >= 21) {
-            audio_format_in = new AudioFormat.Builder().setSampleRate(sample_rate).setEncoding(AudioFormat.ENCODING_PCM_16BIT).
-                    setChannelMask(AudioFormat.CHANNEL_IN_MONO).build();
-
-            audio_format_out = new AudioFormat.Builder().setSampleRate(sample_rate).setEncoding(AudioFormat.ENCODING_PCM_16BIT).
-                    setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build();
-
-            Log.v(TAG, "" + audio_format_in.getEncoding());
-
-        } else {
-            //todo implements for api < 21
-        }
-
+        Log.v(TAG, "sample rate: " + sample_rate);
         Log.v(TAG, "frame size: " + frame_size);
         Log.v(TAG, "frame rate: " + frame_rate);
         Log.v(TAG, "packet size: " + packet_size);
         Log.v(TAG, "packet rate: " + packet_rate);
         Log.v(TAG, "payload type: " + payload_type);
 
+
+        this.audioStream.setCodec(AudioCodec.PCMU);
+        this.audioStream.setMode(RtpStream.MODE_NORMAL);
+
+        audioGroup = new AudioGroup();
+        audioGroup.setMode(AudioGroup.MODE_NORMAL);
+
         try {
-            // 5) udp socket
-            socket = new UdpSocket(local_port);
+            this.audioStream.associate(InetAddress.getByName(remote_addr), remote_port);
+        } catch (UnknownHostException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
 
-            // 6) sender
-            if (dir == FlowSpec.SEND_ONLY || dir == FlowSpec.FULL_DUPLEX) {
 
-//                Log.v(TAG, "new audio sender to " + remote_addr + ":" + remote_port);
-
-                AudioRecord audio_record;
-                if(Build.VERSION.SDK_INT >= 23) {
-                    audio_record = new AudioRecord.Builder()
-                            .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
-                            .setAudioFormat(audio_format_in)
-                            .build();
-
-                } else {
-                    audio_record = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, sample_rate,
-                    AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioRecord.getMinBufferSize(
-                            sample_rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT));
-                }
-
-                // sender
-                sender = new AndroidRtpStreamSender(audio_record, do_sync, payload_type, packet_rate, packet_size, socket, remote_addr, remote_port);
-                audio_input = true;
-            }
-
-            // 7) receiver
+//        try {
+//            // 5) udp socket
+//            socket = new UdpSocket(local_port);
+//
+////
+////            ToneInputStream tone=new ToneInputStream(TONE_FREQ,TONE_AMP,sample_rate,TONE_SAMPLE_SIZE,ToneInputStream.PCM_LINEAR_UNSIGNED,DEFAULT_BIG_ENDIAN);
+////            RtpStreamSender sender =new RtpStreamSender(tone,true,payload_type,packet_rate,packet_size,socket,remote_addr,remote_port);
+////            sender.start();
+//
+//            // 6) sender
+//            if (dir == FlowSpec.SEND_ONLY || dir == FlowSpec.FULL_DUPLEX) {
+//
+//                int audio_record_buffer_size = AudioRecord.getMinBufferSize(sample_rate, AudioFormat.CHANNEL_IN_MONO, encoding) * 2;
+//                Log.v(TAG, "Audio Record buffer size: " + audio_record_buffer_size);
+//
+//                AudioRecord audio_record;
+//                if(Build.VERSION.SDK_INT >= 23) {
+//
+//                    AudioFormat audio_format_in = new AudioFormat.Builder().setSampleRate(sample_rate).setEncoding(encoding).
+//                            setChannelMask(AudioFormat.CHANNEL_IN_MONO).build();
+//
+//                    audio_record = new AudioRecord.Builder()
+//                            .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+//                            .setAudioFormat(audio_format_in)
+//                            .setBufferSizeInBytes(audio_record_buffer_size)
+//                            .build();
+//
+//
+//                    Log.v(TAG, "Audio Record buffer size in frames: " + audio_record.getBufferSizeInFrames());
+//
+//                } else {
+//                    audio_record = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, sample_rate,
+//                    AudioFormat.CHANNEL_IN_MONO, encoding, audio_record_buffer_size);
+//                }
+//
+//
+//                if (Build.VERSION.SDK_INT >= 16) {
+//                    NoiseSuppressor.create(audio_record.getAudioSessionId());
+//                }
+//
+//                // sender
+////                sender = new AndroidUdpSender(audio_record, 800, remote_addr, remote_port, local_port);
+//                sender = new AndroidRtpStreamSender(audio_record, do_sync, payload_type, packet_rate, packet_size, socket, remote_addr, remote_port);
+//                audio_input = true;
+//            }
+//
+//
+//            // 7) receiver
 //            if (dir == FlowSpec.RECV_ONLY || dir == FlowSpec.FULL_DUPLEX) {
-////                Log.v(TAG, "new audio receiver on " + local_port);
+//
+//                int audio_track_buffer_size = AudioTrack.getMinBufferSize(sample_rate, AudioFormat.CHANNEL_OUT_MONO, encoding) * 2;
+//                Log.v(TAG, "Audio Track buffer size: " + audio_track_buffer_size);
 //
 //                AudioTrack audio_track;
 //                if(Build.VERSION.SDK_INT >= 23) {
 //
+//                    AudioFormat audio_format_out = new AudioFormat.Builder().setSampleRate(sample_rate).setEncoding(encoding).
+//                            setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build();
+//
 //                    AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
 //                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build();
-//
-////                    int buffer_size = AudioTrack.getMinBufferSize(audio_format_out.getSampleRate(), audio_format_out.getChannelMask(), audio_format_out.getEncoding());
-//
-////                    Log.v(TAG, "receiver buffer size : " + buffer_size);
 //
 //                    audio_track = new AudioTrack.Builder()
 //                            .setAudioAttributes(audioAttributes)
 //                            .setAudioFormat(audio_format_out)
-////                            .setBufferSizeInBytes(buffer_size)
-//                            .setBufferSizeInBytes(8000 /* 1 second buffer */)
+//                            .setBufferSizeInBytes(audio_track_buffer_size)
+//                            .setTransferMode(AudioTrack.MODE_STREAM)
 //                            .build();
+//
+//                    Log.v(TAG, "Audio Track buffer size in frames: " + audio_track.getBufferSizeInFrames());
+//
 //                } else {
 //
 //                    audio_track = new AudioTrack(AudioManager.STREAM_VOICE_CALL, sample_rate, AudioFormat.CHANNEL_OUT_MONO,
-//                            AudioFormat.ENCODING_PCM_16BIT, 8000 /* 1 second buffer */,
-//                            AudioTrack.MODE_STREAM);
+//                            encoding, audio_track_buffer_size, AudioTrack.MODE_STREAM);
+//
 //                }
 //
 //                // receiver
+////                receiver = new AndroidUdpReceiver(audio_track, local_port, audio_track_buffer_size, this);
 //                receiver = new AndroidRtpStreamReceiver(audio_track, socket,this);
 //                receiver.setRED(red_rate);
 //                audio_output = true;
 //            }
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-        }
+//        } catch (Exception e) {
+//            Log.e(TAG, e.getMessage(), e);
+//        }
     }
     
     @Override
     public boolean startApp() {
         Log.v(TAG, "starting Android audio");
-        if (sender != null) {
-            Log.v(TAG, "start sending");
-            sender.start();
-        }
-        if (receiver!=null) {
-            Log.v(TAG, "start receiving");
-            receiver.start();
-        }
+
+        audioStream.join(audioGroup);
+
+//        if (sender != null) {
+//            Log.v(TAG, "start sending");
+//            sender.start();
+//
+//        }
+//        if (receiver!=null) {
+//            Log.v(TAG, "start receiving");
+//            receiver.start();
+//        }
         return true;
     }
 
     @Override
     public boolean stopApp() {
         Log.v(TAG, "stopping Android audio");
-        if (sender != null) {
-            sender.halt();
-            sender = null;
-            Log.v(TAG, "sender halted");
-        }
 
-        if (receiver != null) {
-            receiver.halt();
-            receiver = null;
-            Log.v(TAG, "receiver halted");
-        }
-
-        // try to take into account the resilience of RtpStreamSender
-        try {
-            Thread.sleep(AndroidRtpStreamReceiver.SO_TIMEOUT); } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-        }
-        socket.close();
+        audioStream.join(null);
+        audioGroup.clear();
+//        if (sender != null) {
+//            sender.halt();
+//            sender = null;
+//            Log.v(TAG, "sender halted");
+//        }
+//
+//        if (receiver != null) {
+//            receiver.halt();
+//            receiver = null;
+//            Log.v(TAG, "receiver halted");
+//        }
+//
+//        // try to take into account the resilience of RtpStreamSender
+//        try {
+//            Thread.sleep(AndroidRtpStreamReceiver.SO_TIMEOUT); } catch (Exception e) {
+//            Log.e(TAG, e.getMessage(), e);
+//        }
+//        socket.close();
         return true;
     }
 
+
     /** From RtpStreamReceiverListener. When the remote socket address (source) is changed. */
-    public void onRemoteSoAddressChanged(AndroidRtpStreamReceiver rr, SocketAddress remote_soaddr) {
+    @Override
+    public void onRemoteSoAddressChanged(AndroidReceiver rr, SocketAddress remote_soaddr) {
         if (symmetric_rtp && sender != null) sender.setRemoteSoAddress(remote_soaddr);
     }
 }

@@ -239,7 +239,7 @@ public class UserAgentProfile extends Configure {
     private int video_avp0=101;
 
     /** Audio types (as Vector of Strings) */
-    private Vector audio_type_list=new Vector();
+    public Vector audio_type_list=new Vector();
     /** Audio types (all in one String) */
     private String audio_types=null;
 

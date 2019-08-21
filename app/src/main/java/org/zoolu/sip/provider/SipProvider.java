@@ -85,16 +85,16 @@ import java.util.Vector;
  */
 public class SipProvider implements Configurable, TransportListener {
 
-    private static final String TAG = "Sip: SipProvider";
+    private static final String TAG = "Sip:SipProvider";
 
     // **************************** Constants ****************************
 
     /** UDP protocol type */
-    public static final String PROTO_UDP="udp";
+    static final String PROTO_UDP="udp";
     /** TCP protocol type */
-    public static final String PROTO_TCP="tcp";
+    static final String PROTO_TCP="tcp";
     /** TLS protocol type */
-    public static final String PROTO_TLS="tls";
+    private static final String PROTO_TLS="tls";
     /** SCTP protocol type */
     public static final String PROTO_SCTP="sctp";
 
@@ -102,10 +102,7 @@ public class SipProvider implements Configurable, TransportListener {
     public static final String AUTO_CONFIGURATION="AUTO-CONFIGURATION";
 
     /** String value "auto-configuration" used for auto configuration of the host address. */
-    public static final String ALL_INTERFACES="ALL-INTERFACES";
-
-    /** String value "NO-OUTBOUND" used for setting no outbound proxy. */
-    //public static final String NO_OUTBOUND="NO-OUTBOUND";
+    private static final String ALL_INTERFACES="ALL-INTERFACES";
 
     /** Identifier used as listener id for capturing ANY incoming messages
      * that does not match any active method_id, transaction_id, nor dialog_id.
@@ -121,27 +118,27 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** Via IP address or fully-qualified domanin name (FQDN).
      * Use 'auto-configuration' for auto detection, or let it undefined. */
-    String via_addr=null;
+    private String via_addr = null;
 
     /** Local SIP port */
-    int host_port=0;
+    private int host_port = 0;
 
     /** Network interface (IP address) used by SIP.
      * Use 'ALL-INTERFACES' for binding SIP to all interfaces (or let it undefined). */
-    String host_ifaddr=null;
+    private String host_ifaddr = null;
 
     /** List of enabled transport protocols (the first protocol is used as default). */
-    String[] transport_protocols=null;
+    private String[] transport_protocols = null;
 
     /** List of transport ports, ordered as the corresponding transport_protocols. */
-    int[] transport_ports=null;
+    private int[] transport_ports = null;
 
     /** Max number of (contemporary) open connections */
-    int nmax_connections=0;
+    private int nmax_connections = 0;
 
     /** Outbound proxy URL ([sip:]host_addr[:host_port][;transport=proto]).
      * Use 'NONE' for not using an outbound proxy (or let it undefined). */
-    SipURL outbound_proxy=null;
+    private SipURL outbound_proxy = null;
 
     /** Whether logging all packets (including non-SIP keepalive tokens). */
     boolean log_all_packets=false;
@@ -953,7 +950,7 @@ public class SipProvider implements Configurable, TransportListener {
 //        Log.v(TAG, "active listeners: "+sip_listeners.size());
     }
     catch (Exception exception)
-    {  Log.v(TAG,"Error handling a new incoming message");
+    {  Log.v(TAG,"Error handling a new incoming message:\n"+msg.toString());
         Log.e(TAG,"",exception);
         for (int i=0; i<exception_listeners.size(); i++)
         {  try

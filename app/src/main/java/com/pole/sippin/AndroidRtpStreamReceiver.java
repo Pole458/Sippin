@@ -13,7 +13,7 @@ import java.io.InterruptedIOException;
 /** AndroidRtpStreamReceiver is an Android RTP receiver.
  * It receives packets from RTP and writes it to the target AudioTrack.
  */
-public class AndroidRtpStreamReceiver extends Thread {
+public class AndroidRtpStreamReceiver extends AndroidReceiver {
 
     private static final String TAG = "Sip:AndrRtpStrmRec";
 
@@ -26,17 +26,11 @@ public class AndroidRtpStreamReceiver extends Thread {
     /** Maximum blocking time, spent waiting for reading new bytes [milliseconds] */
     static final int SO_TIMEOUT = 200;
 
-    /** The OutputStream */
-    private AudioTrack audio_track;
-
     /** The RtpSocket */
     private RtpSocket rtp_socket = null;
 
     /** Remote socket address */
     private SocketAddress remote_soaddr = null;
-
-    /** Whether it is running */
-    private boolean running = false;
 
     /** Packet drop rate (actually it is the inverse of the packet drop rate) */
     private int packet_drop_rate = 0;
@@ -44,16 +38,13 @@ public class AndroidRtpStreamReceiver extends Thread {
     /** Packet counter (incremented only if packet_drop_rate > 0) */
     private int packet_counter = 0;
 
-    /** Listener */
-    private AndroidRtpStreamReceiverListener listener;
 
     /** Constructs a AndroidRtpStreamReceiver.
      * @param audio_track the stream sink
      * @param udp_socket the local receiver UdpSocket
      * @listener the RtpStreamReceiver listener */
-    AndroidRtpStreamReceiver(AudioTrack audio_track, UdpSocket udp_socket, AndroidRtpStreamReceiverListener listener) {
-        this.audio_track = audio_track;
-        this.listener = listener;
+    AndroidRtpStreamReceiver(AudioTrack audio_track, UdpSocket udp_socket, AndroidReceiverListener listener) {
+        super(audio_track, listener);
         if (udp_socket != null)
             rtp_socket = new RtpSocket(udp_socket);
     }
@@ -101,6 +92,7 @@ public class AndroidRtpStreamReceiver extends Thread {
             while (running) {
 
                 try {
+
                     // read a block of data from the rtp socket
                     rtp_socket.receive(rtp_packet);
 
@@ -121,7 +113,7 @@ public class AndroidRtpStreamReceiver extends Thread {
                     }
 
                 } catch (InterruptedIOException e) {
-//                    Log.e(TAG, e.getMessage(), e.getCause());
+                    Log.e(TAG, e.getMessage(), e.getCause());
                 }
             }
 

@@ -21,6 +21,7 @@
 
 package local.ua;
 
+import android.net.rtp.AudioStream;
 import android.util.Log;
 import com.pole.sippin.AndroidAudioApp;
 import local.media.FlowSpec;
@@ -62,7 +63,7 @@ class MediaAgent {
     }
 
     /** Starts a media session */
-    boolean startMediaSession(FlowSpec flow_spec) {
+    boolean startMediaSession(FlowSpec flow_spec, AudioStream audioStream) {
 
         Log.v(TAG, "start("+flow_spec.getMediaSpec()+")");
         Log.v(TAG, "new flow: "+flow_spec.getLocalPort()+((flow_spec.getDirection()==FlowSpec.SEND_ONLY)? "=-->" : ((flow_spec.getDirection()==FlowSpec.RECV_ONLY)? "<--=" : "<-->" ))+flow_spec.getRemoteAddress()+":"+flow_spec.getRemotePort());
@@ -78,7 +79,7 @@ class MediaAgent {
         // start new media_app
         MediaApp media_app = null;
 
-        media_app = newAudioApp(flow_spec);
+        media_app = newAudioApp(flow_spec, audioStream);
 
 //        if (ua_profile.loopback)
 //            media_app = new LoopbackMediaApp(flow_spec);
@@ -114,7 +115,7 @@ class MediaAgent {
     // ********************** media applications *********************
 
     /** Creates a new audio application. */
-    private MediaApp newAudioApp(FlowSpec audio_flow) {
+    private MediaApp newAudioApp(FlowSpec audio_flow, AudioStream audioStream) {
 
         MediaApp audio_app = null;
 
@@ -131,7 +132,7 @@ class MediaAgent {
 
         // Android audio app
         if (ua_profile.javax_sound_app == null) {
-            audio_app = new AndroidAudioApp(audio_flow, ua_profile.javax_sound_sync, ua_profile.random_early_drop_rate, ua_profile.symmetric_rtp);
+            audio_app = new AndroidAudioApp(audio_flow, ua_profile.javax_sound_sync, ua_profile.random_early_drop_rate, ua_profile.symmetric_rtp, audioStream);
         }
 
         return audio_app;

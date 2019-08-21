@@ -12,12 +12,9 @@ import org.zoolu.net.UdpSocket;
 /** AndroidRtpStreamSender is a Android RTP sender.
  * It takes media from a given AudioRecord and sends it through RTP packets to a remote destination.
  */
-public class AndroidRtpStreamSender extends Thread {
+public class AndroidRtpStreamSender extends AndroidSender {
 
     private static final String TAG = "Sip:AndrRtpStrmSender";
-
-    /** The InputStream */
-    private AudioRecord audio_record;
 
     /** The RtpSocket */
     private RtpSocket rtp_socket = null;
@@ -42,10 +39,6 @@ public class AndroidRtpStreamSender extends Thread {
      * in order to compensate program latencies. */
     private int sync_adj = 0;
 
-    /** Whether it is running */
-    private boolean running = false;
-
-
     /** Constructs a RtpStreamSender.
      * @param audio_record the stream to be sent
      * @param do_sync whether time synchronization must be performed by the RtpStreamSender,
@@ -59,11 +52,11 @@ public class AndroidRtpStreamSender extends Thread {
      * @param dest_addr the destination address
      * @param dest_port the destination port */
     AndroidRtpStreamSender(AudioRecord audio_record, boolean do_sync, int payload_type, long frame_rate, int frame_size, UdpSocket src_socket, String dest_addr, int dest_port) {
-        this.audio_record = audio_record;
+        super(audio_record, dest_addr, dest_port);
         this.p_type = payload_type;
         this.frame_rate = frame_rate;
         this.frame_size = frame_size;
-        this.do_sync = do_sync;
+        this.do_sync = false;
         try {
             if (src_socket == null) {
                 src_socket = new UdpSocket(0);
@@ -149,7 +142,9 @@ public class AndroidRtpStreamSender extends Thread {
                         // compensate possible program latency
                         sleep_time -= sync_adj;
                         if (sleep_time < min_time) sleep_time = min_time;
-                        if (sleep_time > 0) try {  Thread.sleep(sleep_time);  } catch (Exception e) {}
+                        if (sleep_time > 0) try {
+                            Log.v(TAG,"Sleep time: " + sleep_time);
+                            Thread.sleep(sleep_time);  } catch (Exception e) {}
                     }
                 } else if (num < 0) {
                     Log.v(TAG,"Error reading from InputStream");

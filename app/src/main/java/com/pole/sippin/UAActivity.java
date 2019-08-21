@@ -1,16 +1,24 @@
 package com.pole.sippin;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.net.rtp.AudioStream;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import local.media.MediaDesc;
+import local.media.MediaSpec;
 import local.ua.UserAgent;
 import local.ua.UserAgentListener;
 import local.ua.UserAgentProfile;
@@ -18,6 +26,9 @@ import org.zoolu.sip.address.NameAddress;
 import org.zoolu.sip.provider.SipProvider;
 import org.zoolu.sip.provider.SipStack;
 
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Vector;
 
 
@@ -25,7 +36,8 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     private static final String TAG = "Sip: UAActivity";
 
-    private static final String addres = "<sip:alice@192.168.1.13:5070>";
+//    private static final String addres = "<sip:alice@192.168.1.2:5070>";
+    private static final String addres = "<sip:echo@mjsip.org>";
 
     // ********************** UserAgent logic **********************
 
@@ -70,19 +82,6 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         ua = new UserAgent(sip_provider, ua_profile,this);
         changeStatus(UA_IDLE);
 
-//        WifiManager wifiMgr = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-//        if(wifiMgr != null) {
-//            WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
-//            int ip = wifiInfo.getIpAddress();
-//            String ipString = String.format(
-//                    "%d.%d.%d.%d",
-//                    (ip & 0xff),
-//                    (ip >> 8 & 0xff),
-//                    (ip >> 16 & 0xff),
-//                    (ip >> 24 & 0xff));
-//        }
-
-
         numberTextView.setText(addres);
         myNumberTextView.setText(ua_profile.getUserURI().toString());
 
@@ -125,10 +124,28 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         hangUp();
     }
 
+//    private String getInetAddress() {
+//
+//        WifiManager wifiMgr = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+//        if(wifiMgr != null) {
+//            WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
+//            int ip = wifiInfo.getIpAddress();
+//            @SuppressLint("DefaultLocale") String ipString = String.format(
+//                    "%d.%d.%d.%d",
+//                    (ip & 0xff),
+//                    (ip >> 8 & 0xff),
+//                    (ip >> 16 & 0xff),
+//                    (ip >> 24 & 0xff));
+//            return ipString;
+//        }
+//
+//        return null;
+//    }
+
     private void requestRecordAudioPermission() {
         //check API version, do nothing if API version < 23!
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentapiVersion > android.os.Build.VERSION_CODES.LOLLIPOP){
+        if (currentapiVersion > Build.VERSION_CODES.LOLLIPOP){
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 
@@ -160,10 +177,27 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
                 new Thread() {
                     @Override
                     public void run() {
-                        ua.hangup();
-                        ua.call(url);
+                        try {
+
+                            AudioManager audio =  (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                            audio.setMode(AudioManager.MODE_IN_COMMUNICATION);
+
+//                            Vector<MediaSpec> audio_specs = new Vector<>(ua_profile.audio_type_list.size());
+//                            for (int i=0; i<ua_profile.audio_type_list.size(); i++) audio_specs.addElement(MediaSpec.parseMediaSpec("audio "+ ua_profile.audio_type_list.elementAt(i)));
+
+//                            Vector<MediaDesc> media_descs = new Vector<>();
+//                            media_descs.addElement(new MediaDesc("audio", getAudioStreamPort(),"RTP/AVP",audio_specs));
+
+                            for(int i = 0; i < ua_profile.media_descs.size(); i++)
+                                ((MediaDesc)ua_profile.media_descs.get(i)).setPort(ua.getAudioStreamPort());
+
+                            ua.hangup();
+                            ua.call(url);
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage(), e);
+                        }
                     }
-                }.start();;
+                }.start();
                 changeStatus(UA_OUTGOING_CALL);
             }
         } else if (call_state == UA_INCOMING_CALL) {

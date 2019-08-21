@@ -24,21 +24,13 @@
 package org.zoolu.sip.message;
 
 
-import org.zoolu.sip.header.Header;
-import org.zoolu.sip.header.MultipleHeader;
-import org.zoolu.sip.header.ReferToHeader;
-import org.zoolu.sip.header.ReferredByHeader;
-import org.zoolu.sip.header.ReplacesHeader;
-import org.zoolu.sip.header.EventHeader;
-import org.zoolu.sip.header.AllowEventsHeader;
-import org.zoolu.sip.header.SubscriptionStateHeader;
-import org.zoolu.sip.header.SipHeaders;
 import org.zoolu.net.UdpPacket;
+import org.zoolu.sip.header.*;
 
 
 /** Class Message extends class sip.message.BaseMessage adding some SIP extensions.
   * <p />
-  * Class Message supports all methods and header definened in RFC3261, plus:
+  * Class Message supports all methods and header defined in RFC3261, plus:
   * <ul>
   * <li> method MESSAGE (RFC3428) </>
   * <li> method REFER (RFC3515) </>
