@@ -110,24 +110,32 @@ public class IpAddress {
     /** Detects the default IP address of this host. */
     public static IpAddress getLocalHostAddress() {
 
-        try {
+        //TODO remove this hack to obtain ip
+        boolean do_we_want_public_ip = false;
+        IpAddress addressPublic = null;
 
+        try {
             Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
             while (networks.hasMoreElements()) {
                 Enumeration<InetAddress> iaddrs = networks.nextElement().getInetAddresses();
                 while (iaddrs.hasMoreElements()) {
                     InetAddress iaddr = iaddrs.nextElement();
-                    if(!iaddr.isLoopbackAddress() && iaddr instanceof Inet4Address && isPrivateIP(iaddr.getHostAddress()))
-                        return new IpAddress(iaddr);
+                    if(!iaddr.isLoopbackAddress() && iaddr instanceof Inet4Address /*&& isPrivateIP(iaddr.getHostAddress())*/) {
+                        if (do_we_want_public_ip)
+                            return new IpAddress(iaddr);
+                        else {
+                            do_we_want_public_ip = true;
+                            addressPublic = new IpAddress(iaddr);
+                        }
+                    }
                 }
             }
-
         } catch (SocketException e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e);
             return null;
         }
 
-        return null;
+        return addressPublic;
 
     }
 
