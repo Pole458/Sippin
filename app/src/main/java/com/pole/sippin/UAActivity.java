@@ -178,19 +178,6 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
                     @Override
                     public void run() {
                         try {
-
-                            AudioManager audio =  (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                            audio.setMode(AudioManager.MODE_IN_COMMUNICATION);
-
-//                            Vector<MediaSpec> audio_specs = new Vector<>(ua_profile.audio_type_list.size());
-//                            for (int i=0; i<ua_profile.audio_type_list.size(); i++) audio_specs.addElement(MediaSpec.parseMediaSpec("audio "+ ua_profile.audio_type_list.elementAt(i)));
-
-//                            Vector<MediaDesc> media_descs = new Vector<>();
-//                            media_descs.addElement(new MediaDesc("audio", getAudioStreamPort(),"RTP/AVP",audio_specs));
-
-                            for(int i = 0; i < ua_profile.media_descs.size(); i++)
-                                ((MediaDesc)ua_profile.media_descs.get(i)).setPort(ua.getAudioStreamPort());
-
                             ua.hangup();
                             ua.call(url);
                         } catch (Exception e) {
@@ -301,6 +288,11 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     /** When an outgoing call has been accepted */
     public void onUaCallAccepted(UserAgent ua) {
+
+        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if(audio != null)
+            audio.setMode(AudioManager.MODE_IN_COMMUNICATION);
+
         runOnUiThread(() -> changeStatus(UA_ON_CALL));
 //        if (ua_profile.hangup_time>0) automaticHangup(ua_profile.hangup_time);
     }
@@ -322,6 +314,11 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     /** When a call has been locally or remotely closed */
     public void onUaCallClosed(UserAgent ua) {
+
+        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if(audio != null)
+            audio.setMode(AudioManager.MODE_NORMAL);
+
         changeStatus(UA_IDLE);
     }
 

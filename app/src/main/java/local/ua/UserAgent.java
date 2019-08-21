@@ -105,7 +105,6 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     /** Creates a new MyUA. */
     public UserAgent(SipProvider sip_provider, UserAgentProfile ua_profile, UserAgentListener listener) {
 
-
         this.sip_provider=sip_provider;
         this.listener=listener;
         this.ua_profile=ua_profile;
@@ -124,19 +123,19 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
         // init media agent
         media_agent = new MediaAgent(ua_profile);
 
+        startAudioStream();
+
     }
 
     // ************************** private methods **************************
 
-
-    public int getAudioStreamPort() {
-        if(audioStream == null) startAudioStream();
-        return audioStream.getLocalPort();
-    }
-
     private void startAudioStream() {
         try {
             audioStream = new AudioStream(InetAddress.getByName(ua_profile.getUserURI().getAddress().getHost()));
+
+            for(int i = 0; i < ua_profile.media_descs.size(); i++)
+                ((MediaDesc)ua_profile.media_descs.get(i)).setPort(audioStream.getLocalPort());
+
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
         }
