@@ -32,11 +32,11 @@ public class FlowSpec
     private int remote_port;
 
     /** Flow direction */
-    private Direction direction;
+    private int direction;
 
 
     /** Creates a new FlowSpec */
-    public FlowSpec(MediaSpec media_spec, int local_port, String remote_addr, int remote_port, Direction direction) {
+    public FlowSpec(MediaSpec media_spec, int local_port, String remote_addr, int remote_port, int direction) {
         this.media_spec=media_spec;
         this.local_port=local_port;
         this.remote_addr=remote_addr;
@@ -69,7 +69,7 @@ public class FlowSpec
 
 
     /** Gets direction. */
-    public Direction getDirection() {
+    public int getDirection() {
         return direction;
     }
 

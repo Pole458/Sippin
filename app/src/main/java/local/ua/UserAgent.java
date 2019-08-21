@@ -413,11 +413,11 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
         Vector md_list = OfferAnswerModel.makeMediaDescriptorProduct(local_sdp.getMediaDescriptors(), remote_sdp.getMediaDescriptors());
         // select the media direction (send_only, recv_ony, fullduplex)
 
-        FlowSpec.Direction dir = FlowSpec.FULL_DUPLEX;
+        int dir = AudioStream.MODE_NORMAL;
         if (ua_profile.recv_only)
-            dir = FlowSpec.RECV_ONLY;
+            dir = AudioStream.MODE_RECEIVE_ONLY;
         else if (ua_profile.send_only)
-            dir = FlowSpec.SEND_ONLY;
+            dir = AudioStream.MODE_SEND_ONLY;
         // for each media
 
         for (Enumeration ei = md_list.elements(); ei.hasMoreElements(); ) {

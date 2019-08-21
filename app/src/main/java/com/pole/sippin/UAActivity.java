@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.net.rtp.AudioCodec;
 import android.net.rtp.AudioStream;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -86,6 +87,11 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         myNumberTextView.setText(ua_profile.getUserURI().toString());
 
         requestRecordAudioPermission();
+
+        for (AudioCodec codec: AudioCodec.getCodecs()) {
+            Log.v(TAG, "Supported codecs: " + codec.type + " " + codec.rtpmap + " " + codec.fmtp);
+        }
+
 //
 //        // Set the re-invite
 //        if (ua_profile.re_invite_time > 0)

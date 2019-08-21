@@ -66,7 +66,7 @@ class MediaAgent {
     boolean startMediaSession(FlowSpec flow_spec, AudioStream audioStream) {
 
         Log.v(TAG, "start("+flow_spec.getMediaSpec()+")");
-        Log.v(TAG, "new flow: "+flow_spec.getLocalPort()+((flow_spec.getDirection()==FlowSpec.SEND_ONLY)? "=-->" : ((flow_spec.getDirection()==FlowSpec.RECV_ONLY)? "<--=" : "<-->" ))+flow_spec.getRemoteAddress()+":"+flow_spec.getRemotePort());
+        Log.v(TAG, "new flow: "+flow_spec.getLocalPort()+((flow_spec.getDirection()==AudioStream.MODE_SEND_ONLY)? "=-->" : ((flow_spec.getDirection()==AudioStream.MODE_RECEIVE_ONLY)? "<--=" : "<-->" ))+flow_spec.getRemoteAddress()+":"+flow_spec.getRemotePort());
 
         String media = flow_spec.getMediaSpec().getType();
 
