@@ -35,7 +35,7 @@ import java.net.URL;
 public class Configure {
 
     /** String 'NONE' used as undefined value (i.e. null). */
-    public static String NONE="NONE";
+    public static String NONE = "NONE";
 
     /** The object that should be configured */
     Configurable configurable;

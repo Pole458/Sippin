@@ -1,14 +1,10 @@
 package com.pole.sippin;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.rtp.AudioCodec;
-import android.net.rtp.AudioStream;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -18,8 +14,6 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import local.media.MediaDesc;
-import local.media.MediaSpec;
 import local.ua.UserAgent;
 import local.ua.UserAgentListener;
 import local.ua.UserAgentProfile;
@@ -27,9 +21,6 @@ import org.zoolu.sip.address.NameAddress;
 import org.zoolu.sip.provider.SipProvider;
 import org.zoolu.sip.provider.SipStack;
 
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Vector;
 
 
@@ -37,8 +28,8 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     private static final String TAG = "Sip: UAActivity";
 
-//    private static final String addres = "<sip:alice@192.168.1.2:5070>";
-    private static final String addres = "<sip:echo@mjsip.org>";
+    private static final String addres = "<sip:alice@192.168.1.2:5070>";
+//    private static final String addres = "<sip:echo@mjsip.org>";
 
     // ********************** UserAgent logic **********************
 
@@ -119,16 +110,19 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 //            ua.loopRegister(ua_profile.expires,ua_profile.expires / 2, ua_profile.keepalive_time);
 //        }
 
-//        if (!ua_profile.audio && !ua_profile.video)
-//            Log.v(TAG, "ONLY SIGNALING, NO MEDIA");
-
     }
 
     @Override
     protected void onDestroy() {
+        new Thread() {
+            @Override
+            public void run() {
+                ua.hangup();
+            }
+        }.start();
         super.onDestroy();
-        hangUp();
     }
+
 
 //    private String getInetAddress() {
 //

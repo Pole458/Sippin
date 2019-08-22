@@ -1,15 +1,15 @@
 package local.ua;
 
 
-
+import android.net.rtp.AudioCodec;
+import android.util.Log;
 import local.media.MediaDesc;
-import local.media.MediaSpec;
 import org.zoolu.net.SocketAddress;
-import org.zoolu.sip.address.*;
-import org.zoolu.sip.provider.SipStack;
+import org.zoolu.sip.address.NameAddress;
+import org.zoolu.sip.address.SipURL;
 import org.zoolu.sip.provider.SipProvider;
+import org.zoolu.sip.provider.SipStack;
 import org.zoolu.tools.Configure;
-import org.zoolu.tools.MultiTable;
 import org.zoolu.tools.Parser;
 
 import java.util.Vector;
@@ -20,10 +20,7 @@ import java.util.Vector;
  */
 public class UserAgentProfile extends Configure {
 
-    private static final String TAG = "Sip: UserAgentProfile";
-
-    /** The default configuration file */
-    private static String config_file="mjsip.cfg";
+    private static final String TAG = "Sip:UserAgentProfile";
 
     // ********************** user configurations *********************
 
@@ -44,7 +41,7 @@ public class UserAgentProfile extends Configure {
      * If <i>proxy</i> is not defined, the <i>registrar</i> value is used in its place.
      * <p/>
      * If <i>registrar</i> is not defined, the <i>proxy</i> value is used in its place. */
-    public String proxy=null;
+    public String proxy = null;
 
     /** Fully qualified domain name (or address) of the registrar server.
      * It is used as recipient for REGISTER requests.
@@ -52,40 +49,27 @@ public class UserAgentProfile extends Configure {
      * If <i>registrar</i> is not defined, the <i>proxy</i> value is used in its place.
      * <p/>
      * If <i>proxy</i> is not defined, the <i>registrar</i> value is used in its place. */
-    public String registrar=null;
+    public String registrar = null;
 
     /** MyUA address.
      * It is the SIP address of the MyUA and is used to form the From URL if no proxy is configured. */
-    public String ua_address=null;
+    public String ua_address = null;
 
     /** User's name used for server authentication. */
-    public String auth_user=null;
+    public String auth_user = null;
     /** User's realm used for server authentication. */
-    public String auth_realm=null;
+    public String auth_realm = null;
     /** User's passwd used for server authentication. */
-    public String auth_passwd=null;
-
-    /** Absolute path (or complete URL) of the jar archive, where various MyUA media (gif, wav, etc.) are stored.
-     * Use value 'NONE' for getting resources from external folders.
-     * By default, the file "lib/ua.jar" is used. */
-    public static String ua_jar="lib/ua.jar";
-
-    /** Absolute path (or complete URL) of the media resources (gif, wav, etc.), used by the MyUA.
-     * By default, the folder "media/local/ua/" is used. */
-    public static String media_path="media/local/ua/";
-
-    /** Absolute path (or complete URL) of the buddy list file where the buddy list is and loaded from (and saved to).
-     * By default, the file "buddy.lst" is used. */
-    public static String buddy_list_file="buddy.lst";
+    public String auth_passwd = null;
 
     /** Whether registering with the registrar server */
-    public boolean do_register=false;
+    public boolean do_register = false;
     /** Whether unregistering the contact address */
-    public boolean do_unregister=false;
-    /** Whether unregistering all contacts beafore registering the contact address */
-    public boolean do_unregister_all=false;
+    public boolean do_unregister = false;
+    /** Whether unregistering all contacts before registering the contact address */
+    public boolean do_unregister_all = false;
     /** Expires time (in seconds). */
-    public int expires=3600;
+    public int expires = 3600;
 
     /** Rate of keep-alive tokens (datagrams) sent toward the outbound proxy
      * (if present) or toward the registrar server.
@@ -99,176 +83,91 @@ public class UserAgentProfile extends Configure {
     public NameAddress call_to = null;
 
     /** Response time in seconds; it is the maximum time the user can wait before responding to an incoming call; after such time the call is automatically declined (refused). */
-    public int refuse_time=20;
+    public int refuse_time = 20;
     /** Automatic answer time in seconds; time<0 corresponds to manual answer mode. */
-    public int accept_time=-1;
+    public int accept_time = -1;
     /** Automatic hangup time (call duartion) in seconds; time<=0 corresponds to manual hangup mode. */
-    public int hangup_time=-1;
+    public int hangup_time = -1;
     /** Automatic call transfer time in seconds; time<0 corresponds to no auto transfer mode. */
-    public int transfer_time=-1;
+    public int transfer_time = -1;
     /** Automatic re-inviting time in seconds; time<0 corresponds to no auto re-invite mode.  */
-    public int re_invite_time=-1;
+    public int re_invite_time = -1;
 
-    /** Redirect incoming call to the secified url.
+    /** Redirect incoming call to the specified url.
      * Use value 'NONE' for not redirecting incoming calls (or let it undefined). */
-    public NameAddress redirect_to=null;
+    public NameAddress redirect_to = null;
 
-    /** Transfer calls to the secified url.
+    /** Transfer calls to the specified url.
      * Use value 'NONE' for not transferring calls (or let it undefined). */
-    public NameAddress transfer_to=null;
+    public NameAddress transfer_to = null;
 
     /** No offer in the invite */
-    public boolean no_offer=false;
+    public boolean no_offer = false;
     /** Do not use prompt */
-    public boolean no_prompt=false;
+    public boolean no_prompt = false;
 
     /** Whether using audio */
-    public boolean audio=true;
+    public boolean audio = true;
     /** Whether using video */
-    public boolean video=false;
+    public boolean video = false;
 
     /** Whether looping the received media streams back to the sender. */
-    public boolean loopback=false;
+    public boolean loopback = false;
     /** Whether playing in receive only mode */
-    public boolean recv_only=false;
+    public boolean recv_only = false;
     /** Whether playing in send only mode */
-    public boolean send_only=false;
+    public boolean send_only = false;
     /** Whether playing a test tone in send only mode */
-    public boolean send_tone=false;
+    public boolean send_tone = false;
     /** Audio file to be streamed */
-    public String send_file=null;
+    public String send_file = null;
     /** Audio file to be recorded */
-    public String recv_file=null;
+    public String recv_file = null;
     /** Video file to be streamed */
-    public String send_video_file=null;
+    public String send_video_file = null;
     /** Video file to be recorded */
-    public String recv_video_file=null;
+    public String recv_video_file = null;
 
     /** Media address (use it if you want to use a media address different from the via address) */
-    public String media_addr=null;
-    /** First media port (use it if you want to use media ports different from those specified in media_descs) */
-    public int media_port=-1;
+    public String media_addr = null;
+    /** First media port (use it if you want to use media ports different from those specified in mediaDescs) */
+    public int media_port = -1;
 
     /** Whether using symmetric_rtp */
-    public boolean symmetric_rtp=false;
+    public boolean symmetric_rtp = false;
 
     /** Vector of media descriptions (MediaDesc) */
-    public Vector media_descs=new Vector();
-
-    /** MultiTable of media specifications, as multiple-values table of (String)media-->(MediaSpec)media_spec */
-    private MultiTable media_spec_mtable=new MultiTable();
-
-    /** Whether using JMF for audio streaming */
-    public boolean use_jmf_audio=false;
-    /** Whether using JMF for video streaming */
-    public boolean use_jmf_video=true;
-    /** Whether using RAT (Robust Audio Tool) as audio sender/receiver */
-    public boolean use_rat=false;
-    /** Whether using VIC (Video Conferencing Tool) as video sender/receiver */
-    public boolean use_vic=false;
-    /** RAT command-line executable */
-    public String bin_rat="rat";
-    /** VIC command-line executable */
-    public String bin_vic="vic";
+    public Vector<MediaDesc> mediaDescs = new Vector<>();
 
 
     // ******************** undocumented parametes ********************
 
     /** Whether running the UAS (User Agent Server), or acting just as UAC (User Agent Client). In the latter case only outgoing calls are supported. */
-    public boolean ua_server=true;
+    public boolean ua_server = true;
     /** Whether running an Options Server, that automatically responds to OPTIONS requests. */
-    public boolean options_server=true;
+    public boolean options_server = true;
     /** Whether running an Null Server, that automatically responds to not-implemented requests. */
-    public boolean null_server=true;
-
-    /** Alternative javax-sound-based audio application (currently just for tests) */
-    public String javax_sound_app=null;
-
-    /** Whether using explicit external converter (i.e. direct access to an external conversion provider) instead of that provided by javax.sound.sampled.spi. It applies only when javax sound is used, that is when no other audio apps (such as jmf or rat) are used.  */
-    public boolean javax_sound_direct_convertion=false;
-
-    /** Sender synchronization adjustment, that is the time (in milliseconds) that a frame
-     * should be sent in advance by the RTP sender, before the nominal time.
-     * A value less that 0 means no re-synchronization explicitely performed by the RTP sender.
-     * <p/>
-     * Note that when using audio capturing, synchronization with the sample rate
-     * is implicitely performed by the audio capture device and frames are read at constat bit rate.
-     * However, a value of this parameter >=0 (explicit re-synchronization) is suggested
-     * in order to let the read() method be non-blocking (in the other case
-     * the MyUA audio performances seem to decrease). */
-    //public int javax_sound_sync_adj=2;
-
-    /** Whether enforcing time synchronization to RTP source stream.
-     * If synchronization is explicitely performed, the depature time of each RTP packet is equal to its nominal time.
-     * <p/>
-     * Note that when using audio capturing, synchronization with the sample rate
-     * is implicitely performed by the audio capture device and frames are read at constat bit rate.
-     * However, an explicit re-synchronization is suggested
-     * in order to let the read() method be non-blocking (in the other case
-     * the MyUA audio performance seems decreasing. */
-    public boolean javax_sound_sync = true;
-
-    /** Receiver random early drop (RED) rate. Actually it is the inverse of packet drop rate.
-     * It can used to prevent long play back delay. 
-     * A value less or equal to 0 means that no packet dropping is explicitly
-     * performed at the RTP receiver. */
-    public int random_early_drop_rate = 20;
+    public boolean null_server = true;
 
     /** Fixed audio multicast socket address; if defined, it forces the use of this maddr+port for audio session */
-    public SocketAddress audio_mcast_soaddr=null;
+    public SocketAddress audio_mcast_soaddr = null;
+
     /** Fixed video multicast socket address; if defined, it forces the use of this maddr+port for video session */
-    public SocketAddress video_mcast_soaddr=null;
+    public SocketAddress video_mcast_soaddr = null;
 
 
     // ********************* historical parametes *********************
 
     /** Default audio port */
-    private int audio_port=4000;
+    private int audio_port = 4000;
     /** Default video port */
-    private int video_port=4002;
-
-    /** Default audio avp */
-    private int audio_avp0=0;
-    /** Default audio codec */
-    private String audio_codec0="PCMU";
-    /** Default audio sample rate */
-    private int audio_sample_rate0=8000;
-    /** Default audio packet size */
-    private int audio_packet_size0=320;
-    /** Default video avp */
-    private int video_avp0=101;
-
-    /** Audio types (as Vector of Strings) */
-    public Vector audio_type_list=new Vector();
-    /** Audio types (all in one String) */
-    private String audio_types=null;
-
-    /** Video types (as Vector of Strings) */
-    private Vector video_type_list=new Vector();
-    /** Video types (all in one String) */
-    private String video_types=null;
-
-    /** Whether using JMF for audio/video streaming */
-    private boolean use_jmf=false;
-
+    private int video_port = 4002;
 
     // ************************** costructors *************************
 
     /** Constructs a void UserAgentProfile */
     public UserAgentProfile() {
-        init();
-    }
 
-    /** Constructs a new UserAgentProfile */
-    public UserAgentProfile(String file) {
-        // load configuration
-        loadFile(file);
-        // 1post-load manipulation
-        init();
-    }
-
-    /** Inits the UserAgentProfile. */
-    private void init() {
         if (proxy!=null && proxy.equalsIgnoreCase(Configure.NONE)) proxy=null;
         if (registrar!=null && registrar.equalsIgnoreCase(Configure.NONE)) registrar=null;
         if (display_name!=null && display_name.equalsIgnoreCase(Configure.NONE)) display_name=null;
@@ -277,68 +176,12 @@ public class UserAgentProfile extends Configure {
         if (send_file!=null && send_file.equalsIgnoreCase(Configure.NONE)) send_file=null;
         if (recv_file!=null && recv_file.equalsIgnoreCase(Configure.NONE)) recv_file=null;
 
-        // media descrptions
-        // BEGIN BACKWARD COMPATIBILITY
-        if (media_descs.size()==0)
-        {  if (audio_types!=null)
-        {  Parser par=new Parser(audio_types);
-            if (par.indexOf('{')>=0) par.goTo('{').skipChar();
-            while (par.hasMore())
-            {  char[] delim={ ',' , ';' , '}' };
-                String audio_type=par.getWord(delim).trim();
-                if (audio_type.length()>0) audio_type_list.addElement(audio_type);
-                par.skipChar();
-            }
-        }
-            if (audio_type_list.size()>0)
-            {  Vector audio_specs=new Vector(audio_type_list.size());
-                for (int i=0; i<audio_type_list.size(); i++) audio_specs.addElement(MediaSpec.parseMediaSpec("audio "+(String)audio_type_list.elementAt(i)));
-                media_descs.addElement(new MediaDesc("audio",audio_port,"RTP/AVP",audio_specs));
-            }
-            if (video_types!=null)
-            {  Parser par=new Parser(video_types);
-                if (par.indexOf('{')>=0) par.goTo('{').skipChar();
-                while (par.hasMore())
-                {  char[] delim={ ',' , ';' , '}' };
-                    String video_type=par.getWord(delim).trim();
-                    if (video_type.length()>0) video_type_list.addElement(video_type);
-                }
-            }
-            if (video_type_list.size()>0)
-            {  Vector video_specs=new Vector(video_type_list.size());
-                for (int i=0; i<video_type_list.size(); i++) video_specs.addElement(MediaSpec.parseMediaSpec("video "+(String)video_type_list.elementAt(i)));
-                media_descs.addElement(new MediaDesc("video",video_port,"RTP/AVP",video_specs));
-            }
-        }
-        if (media_descs.size()==0)
-        {  Vector audio_specs=new Vector(1);
-            audio_specs.addElement(new MediaSpec("audio",audio_avp0,audio_codec0,audio_sample_rate0,audio_packet_size0));
-            media_descs.addElement(new MediaDesc("audio",audio_port,"RTP/AVP",audio_specs));
-            //Vector video_specs=new Vector(1);
-            //video_specs.addElement(new MediaSpec("video",video_avp0,null,-1,-1));
-            //media_descs.addElement(new MediaDesc("video",video_port,"rtp/avp",video_specs));
-        }
-        if (!use_jmf_audio && !use_jmf_video) use_jmf_audio=use_jmf_video=use_jmf;
-        // END BACKWARD COMPATIBILITY
-
-        // BEGIN PACH FOR JMF SUPPORT
-        if (audio && use_jmf_audio)
-        {  media_spec_mtable.remove("audio");
-            media_spec_mtable.put("audio",new MediaSpec("audio",11,"L16",16000,320));
-        }
-        else
-        if (video && use_jmf_video)
-        {  media_spec_mtable.remove("video");
-            media_spec_mtable.put("video",new MediaSpec("video",101,null,-1,-1));
-        }
-        // END PACH FOR JMF SUPPORT
-        for (int i=0; i<media_descs.size(); i++)
-        {  MediaDesc md=(MediaDesc)media_descs.elementAt(i);
-            Vector media_specs=media_spec_mtable.get(md.getMedia());
-            if (media_specs!=null) for (int j=0; j<media_specs.size(); j++) md.addMediaSpec((MediaSpec)media_specs.elementAt(j));
+        Vector<AudioCodec> audioCodecs = new Vector<>();
+        for(AudioCodec codec : AudioCodec.getCodecs()) {
+           audioCodecs.addElement(codec);
         }
 
-        if (ua_jar!=null && ua_jar.equalsIgnoreCase(Configure.NONE)) ua_jar=null;
+        mediaDescs.addElement(new MediaDesc("audio", audio_port, "RTP/AVP", audioCodecs));
 
         setUnconfiguredAttributes(null);
     }
@@ -365,8 +208,8 @@ public class UserAgentProfile extends Configure {
      * It actually sets the <i>display_name</i>, <i>user</i>, and <i>proxy</i> parameters.
      * <p/>
      * If <i>registrar</i> is not defined, the <i>proxy</i> value is used in its place. */
-    public void setUserURI(NameAddress naddr)
-    {  SipURL url=naddr.getAddress();
+    public void setUserURI(NameAddress naddr) {
+        SipURL url=naddr.getAddress();
         if (display_name==null) display_name=naddr.getDisplayName();
         if (user==null) user=url.getUserName();
         if (proxy==null) proxy=(url.hasPort())? url.getHost()+":"+url.getPort() : url.getHost();
@@ -378,8 +221,8 @@ public class UserAgentProfile extends Configure {
      * and <i>auth_user</i> attributes.
      * <p/>
      * Note: this method sets such attributes only if they haven't still been initilized. */
-    public void setUnconfiguredAttributes(SipProvider sip_provider)
-    {  if (registrar==null && proxy!=null) registrar=proxy;
+    public void setUnconfiguredAttributes(SipProvider sip_provider) {
+        if (registrar==null && proxy!=null) registrar=proxy;
         if (proxy==null && registrar!=null) proxy=registrar;
         if (auth_realm==null && proxy!=null) auth_realm=proxy;
         if (auth_realm==null && registrar!=null) auth_realm=registrar;
@@ -390,47 +233,11 @@ public class UserAgentProfile extends Configure {
         }
     }
 
-    /** Inits contact and secure contact addresses (if not already done)
-     * according to the specified sip provider.
-     * It actually initializes <i>contact_url</i> and <i>secure_contact_url</i> attributes.
-     * <p/>
-     * Note: this method sets such attributes only if they haven't still been initilized. */
-   /*public void initUnconfiguredContactAddress(SipProvider sip_provider)
-   {  if (contact_url==null) contact_url=getContactAddress(sip_provider);
-      if (secure_contact_url==null) secure_contact_url=getSecureContactAddress(sip_provider);
-   }*/
-
-    /** Updates contact and secure contact addresses according to the specified sip provider.
-     * It actually sets <i>contact_url</i> and <i>secure_contact_url</i> attributes. */
-   /*public void updateContactAddress(SipProvider sip_provider)
-   {  contact_url=getContactAddress(sip_provider);
-      secure_contact_url=getSecureContactAddress(sip_provider);
-   }*/
-
-    // ************************ private methods ***********************
-
-    /** Gets a valid address with username and transport information. */
-   /*private NameAddress getContactAddress(SipProvider sip_provider)
-   {  SipURL url=(sip_provider.getPort()!=SipStack.default_port)? new SipURL(user,sip_provider.getViaAddress(),sip_provider.getPort()) : new SipURL(user,sip_provider.getViaAddress());
-      if (!sip_provider.hasTransport(SipProvider.PROTO_UDP)) url.addTransport(sip_provider.getDefaultTransport());
-      return new NameAddress(url);
-   }*/
-
-    /** Gets a valid secure address with username and transport information. */
-   /*private NameAddress getSecureContactAddress(SipProvider sip_provider)
-   {  if (sip_provider.hasTransport(SipProvider.PROTO_TLS))
-      {  SipURL url=(sip_provider.getTlsPort()!=SipStack.default_tls_port)? new SipURL(user,sip_provider.getViaAddress(),sip_provider.getTlsPort()) : new SipURL(user,sip_provider.getViaAddress()); 
-         url.setSecure(true);
-         return new NameAddress(url);
-      }
-      else return null;
-   }*/
-
     // *********************** protected methods **********************
 
     /** Parses a single line (loaded from the config file) */
-    protected void parseLine(String line)
-    {  String attribute;
+    protected void parseLine(String line) {
+        String attribute;
         Parser par;
         int index=line.indexOf("=");
         if (index>0) {  attribute=line.substring(0,index).trim(); par=new Parser(line,index+1);  }
@@ -444,10 +251,6 @@ public class UserAgentProfile extends Configure {
         if (attribute.equals("auth_user"))      {  auth_user=par.getString();  return;  }
         if (attribute.equals("auth_realm"))     {  auth_realm=par.getRemainingString().trim();  return;  }
         if (attribute.equals("auth_passwd"))    {  auth_passwd=par.getRemainingString().trim();  return;  }
-
-        if (attribute.equals("ua_jar"))         {  ua_jar=par.getStringUnquoted();  return;  }
-        if (attribute.equals("media_path"))     {  media_path=par.getStringUnquoted();  return;  }
-        if (attribute.equals("buddy_list_file")){  buddy_list_file=par.getStringUnquoted();  return;  }
 
         if (attribute.equals("do_register"))    {  do_register=(par.getString().toLowerCase().startsWith("y"));  return;  }
         if (attribute.equals("do_unregister"))  {  do_unregister=(par.getString().toLowerCase().startsWith("y"));  return;  }
@@ -473,6 +276,7 @@ public class UserAgentProfile extends Configure {
             else transfer_to=new NameAddress(naddr);
             return;
         }
+
         if (attribute.equals("refuse_time"))    {  refuse_time=par.getInt();  return;  }
         if (attribute.equals("accept_time"))    {  accept_time=par.getInt();  return;  }
         if (attribute.equals("hangup_time"))    {  hangup_time=par.getInt();  return;  }
@@ -496,24 +300,11 @@ public class UserAgentProfile extends Configure {
         if (attribute.equals("media_addr"))     {  media_addr=par.getString();  return;  }
         if (attribute.equals("media_port"))     {  media_port=par.getInt();  return;  }
         if (attribute.equals("symmetric_rtp"))  {  symmetric_rtp=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("media") ||
-                attribute.equals("media_desc"))     {  media_descs.addElement(MediaDesc.parseMediaDesc(par.getRemainingString().trim()));  return;  }
-        if (attribute.equals("media_spec"))     {  MediaSpec ms=MediaSpec.parseMediaSpec(par.getRemainingString().trim());  media_spec_mtable.put(ms.getType(),ms);  return;  }
 
-        if (attribute.equals("use_jmf_audio"))  {  use_jmf_audio=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("use_jmf_video"))  {  use_jmf_video=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("use_rat"))        {  use_rat=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("bin_rat"))        {  bin_rat=par.getStringUnquoted();  return;  }
-        if (attribute.equals("use_vic"))        {  use_vic=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("bin_vic"))        {  bin_vic=par.getStringUnquoted();  return;  }
 
         if (attribute.equals("ua_server")) {  ua_server=(par.getString().toLowerCase().startsWith("y"));  return;  }
         if (attribute.equals("options_server")) {  options_server=(par.getString().toLowerCase().startsWith("y"));  return;  }
         if (attribute.equals("null_server")) {  null_server=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("javax_sound_app")) {  javax_sound_app=par.getString();  return;  }
-        if (attribute.equals("javax_sound_direct_convertion")) {  javax_sound_direct_convertion=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("javax_sound_sync")) {  javax_sound_sync=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("random_early_drop_rate")) {  random_early_drop_rate=par.getInt();  return;  }
         if (attribute.equals("audio_mcast_soaddr")) {  audio_mcast_soaddr=new SocketAddress(par.getString());  return;  }
         if (attribute.equals("video_mcast_soaddr")) {  video_mcast_soaddr=new SocketAddress(par.getString());  return;  }
 
@@ -521,25 +312,9 @@ public class UserAgentProfile extends Configure {
         if (attribute.equals("from_url"))         {  setUserURI(new NameAddress(par.getRemainingString().trim()));  return;  }
         if (attribute.equals("contact_user"))     {  user=par.getString();  return;  }
         if (attribute.equals("auto_accept"))      {  accept_time=((par.getString().toLowerCase().startsWith("y")))? 0 : -1;  return;  }
-        if (attribute.equals("contacts_file"))    {  buddy_list_file=par.getStringUnquoted();  return;  }
 
         if (attribute.equals("audio_port"))     {  audio_port=par.getInt();  return;  }
         if (attribute.equals("video_port"))     {  video_port=par.getInt();  return;  }
-        if (attribute.equals("audio_type"))     {  audio_type_list.addElement(par.getRemainingString().trim());  return;  }
-        if (attribute.equals("video_type"))     {  video_type_list.addElement(par.getRemainingString().trim());  return;  }
-        if (attribute.equals("audio_types"))    {  audio_types=par.getRemainingString().trim();  return;  }
-        if (attribute.equals("video_types"))    {  video_types=par.getRemainingString().trim();  return;  }
-
-        if (attribute.equals("audio_avp"))        {  audio_avp0=par.getInt();  return;  }
-        if (attribute.equals("audio_codec"))      {  audio_codec0=par.getString();  return;  }
-        if (attribute.equals("audio_sample_rate")){  audio_sample_rate0=par.getInt();  return;  }
-        if (attribute.equals("audio_packet_size")){  audio_packet_size0=par.getInt();  return;  }
-        if (attribute.equals("video_avp"))        {  video_avp0=par.getInt();  return;  }
-
-        if (attribute.equals("audio_frame_size")) {  audio_packet_size0=par.getInt();  return;  }
-        if (attribute.equals("javax_sound_launcher")) {  javax_sound_app=par.getString();  return;  }
-        if (attribute.equals("javax_sound_sync_adj")) {  javax_sound_sync=(par.getInt()>=0);  return;  }
-        if (attribute.equals("use_jmf"))        {  use_jmf=(par.getString().toLowerCase().startsWith("y"));  return;  }
 
         // old parameters
         if (attribute.equals("contact_url")) System.err.println("WARNING: parameter 'contact_url' is no more supported.");
@@ -548,9 +323,8 @@ public class UserAgentProfile extends Configure {
 
 
     /** Converts the entire object into lines (to be saved into the config file) */
-    protected String toLines()
-    {  // currently not implemented..
+    protected String toLines() {
+        // currently not implemented..
         return getUserURI().toString();
     }
-
 }

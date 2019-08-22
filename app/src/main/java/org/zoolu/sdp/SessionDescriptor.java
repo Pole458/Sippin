@@ -265,14 +265,14 @@ public class SessionDescriptor
      * @param media_descs Vector if MediaDescriptor 
      * @return this SessionDescriptor */
     public SessionDescriptor addMediaDescriptors(Vector media_descs)
-    {  //media.addAll(media_descs); // not supported by J2ME..
+    {  //media.addAll(mediaDescs); // not supported by J2ME..
         for (int i=0; i<media_descs.size(); i++) media.addElement(media_descs.elementAt(i));
         return this;
     }
 
     /** Gets all MediaDescriptors */
-    public Vector getMediaDescriptors()
-    {  return media;
+    public Vector<MediaDescriptor> getMediaDescriptors() {
+        return media;
     }
 
     /** Removes all MediaDescriptors */
@@ -387,16 +387,17 @@ public class SessionDescriptor
 
 
     /** Gets a String rapresentation */
-    public String toString()
-    {  //String str=v.toString()+o.toString()+s.toString();
-        StringBuffer sb=new StringBuffer();
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
         if (v!=null) sb.append(v.toString());
         if (o!=null) sb.append(o.toString());
         if (s!=null) sb.append(s.toString());
         if (c!=null) sb.append(c.toString());
         if (t!=null) sb.append(t.toString());
-        for (int i=0; i<av.size(); i++) sb.append(((AttributeField)av.elementAt(i)).toString());
-        for (int i=0; i<media.size(); i++) sb.append(((MediaDescriptor)media.elementAt(i)).toString());
+        for (int i = 0; i < av.size(); i++)
+            sb.append(av.elementAt(i).toString());
+        for (int i = 0; i < media.size(); i++)
+            sb.append(media.elementAt(i).toString());
         return sb.toString();
     }
 

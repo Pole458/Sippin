@@ -29,10 +29,7 @@ import java.io.*;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyStore;
-//import java.security.cert.Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
-//import sun.misc.BASE64Encoder;
-//import sun.misc.BASE64Decoder;
 import org.zoolu.tools.Base64;
 
 

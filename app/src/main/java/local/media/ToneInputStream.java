@@ -28,16 +28,15 @@ import java.lang.Math;
 
 /** Generates a single tone.
  */
-public class ToneInputStream extends java.io.InputStream
-{
+public class ToneInputStream extends java.io.InputStream {
     /** The number of bytes that are notified as available */
-    static int MAX_AVAILABLE_BYTES=65536;
+    static int MAX_AVAILABLE_BYTES = 65536;
 
     /** Identifier of linear unsigned PCM */
-    public static final int PCM_LINEAR_UNSIGNED=0;
+    public static final int PCM_LINEAR_UNSIGNED = 0;
 
     /** Identifier of linear signed PCM */
-    public static final int PCM_LINEAR_SIGNED=1;
+    public static final int PCM_LINEAR_SIGNED = 1;
 
 
     /** Tone frequence */

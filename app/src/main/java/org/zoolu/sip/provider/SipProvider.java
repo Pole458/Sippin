@@ -343,7 +343,7 @@ public class SipProvider implements Configurable, TransportListener {
         transport.setListener(this);
         if(default_transport == null)
             default_transport = proto;
-        Log.v(TAG, proto + " is up at port " + transport.getLocalPort());
+//        Log.v(TAG, proto + " is up at port " + transport.getLocalPort());
     }
 
     /** Removes a specific transport protocol. */
@@ -353,14 +353,14 @@ public class SipProvider implements Configurable, TransportListener {
         sip_transports.remove(proto);
         t.halt();
         if (proto.equals(default_transport)) default_transport=null;
-        Log.v(TAG, proto+" is down");
+//        Log.v(TAG, proto+" is down");
     }
     }
 
 
     /** Stops the SipProviders. */
-    public synchronized void halt()
-    {  Log.v(TAG, "halt: SipProvider is going down");
+    public synchronized void halt() {
+//        Log.v(TAG, "halt: SipProvider is going down");
         stopSipTrasport();
         sip_listeners=new Hashtable();
         promiscuous_listeners=new Vector();
@@ -586,8 +586,8 @@ public class SipProvider implements Configurable, TransportListener {
      * as to be associated to. It may identify a method, a transaction, or a dialog, or all messages.
      * Use SipProvider.ANY to capture all messages.
      * @param listener is the SipProviderListener that the specified type of messages has to be passed to. */
-    public synchronized void addSelectiveListener(SipId id, SipProviderListener listener)
-    {  Log.v(TAG, "setting SipProviderListener: "+id);
+    public synchronized void addSelectiveListener(SipId id, SipProviderListener listener) {
+//        Log.v(TAG, "setting SipProviderListener: "+id);
         SipId key=id;
         if (sip_listeners.containsKey(key))
         {  Log.v(TAG,"setting a SipProvider listener with an identifier already selected: the previous listener is removed.");
@@ -600,11 +600,11 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** Removes a SipProviderListener.
      * @param id is the identifier that specifies the messages that the listener was associated to. */
-    public synchronized void removeSelectiveListener(SipId id)
-    {  Log.v(TAG, "removing SipProviderListener: "+id);
+    public synchronized void removeSelectiveListener(SipId id) {
+//        Log.v(TAG, "removing SipProviderListener: "+id);
         SipId key=id;
-        if (!sip_listeners.containsKey(key))
-        {  Log.v(TAG,"removeListener("+id+"): no such listener found.");
+        if (!sip_listeners.containsKey(key)) {
+//            Log.v(TAG,"removeListener("+id+"): no such listener found.");
         }
         else
         {  sip_listeners.remove(key);
@@ -620,10 +620,10 @@ public class SipProvider implements Configurable, TransportListener {
      * <br/> More that one SipProviderListener can be active in promiscuous mode at the same time;
      * in that case the same message is passed to all promiscuous SipProviderListeners.
      * @param listener is the SipProviderListener. */
-    public synchronized void addPromiscuousListener(SipProviderListener listener)
-    {  Log.v(TAG, "adding SipProviderListener in promiscuous mode");
-        if (promiscuous_listeners.contains(listener))
-        {  Log.v(TAG,"trying to add an already present SipProviderListener in promiscuous mode.");
+    public synchronized void addPromiscuousListener(SipProviderListener listener) {
+//        Log.v(TAG, "adding SipProviderListener in promiscuous mode");
+        if (promiscuous_listeners.contains(listener)) {
+//            Log.v(TAG,"trying to add an already present SipProviderListener in promiscuous mode.");
         }
         else
         {  promiscuous_listeners.addElement(listener);
@@ -633,10 +633,10 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** Removes a SipProviderListener in promiscuous mode.
      * @param listener is the SipProviderListener to be removed. */
-    public synchronized void removePromiscuousListener(SipProviderListener listener)
-    {  Log.v(TAG, "removing SipProviderListener in promiscuous mode");
-        if (!promiscuous_listeners.contains(listener))
-        {  Log.v(TAG,"trying to remove a missed SipProviderListener in promiscuous mode.");
+    public synchronized void removePromiscuousListener(SipProviderListener listener) {
+//        Log.v(TAG, "removing SipProviderListener in promiscuous mode");
+        if (!promiscuous_listeners.contains(listener)) {
+//            Log.v(TAG,"trying to remove a missed SipProviderListener in promiscuous mode.");
         }
         else
         {  promiscuous_listeners.removeElement(listener);
@@ -647,10 +647,10 @@ public class SipProvider implements Configurable, TransportListener {
     /** Adds a SipProviderExceptionListener.
      * The SipProviderExceptionListener is a listener for all exceptions thrown by the SipProviders.
      * @param listener is the SipProviderExceptionListener. */
-    public synchronized void addExceptionListener(SipProviderExceptionListener listener)
-    {  Log.v(TAG, "adding a SipProviderExceptionListener");
-        if (exception_listeners.contains(listener))
-        {  Log.v(TAG,"trying to add an already present SipProviderExceptionListener.");
+    public synchronized void addExceptionListener(SipProviderExceptionListener listener) {
+//        Log.v(TAG, "adding a SipProviderExceptionListener");
+        if (exception_listeners.contains(listener)) {
+//            Log.v(TAG,"trying to add an already present SipProviderExceptionListener.");
         }
         else
         {  exception_listeners.addElement(listener);
@@ -660,10 +660,10 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** Removes a SipProviderExceptionListener.
      * @param listener is the SipProviderExceptionListener to be removed. */
-    public synchronized void removeExceptionListener(SipProviderExceptionListener listener)
-    {  Log.v(TAG, "removing a SipProviderExceptionListener");
-        if (!exception_listeners.contains(listener))
-        {  Log.v(TAG,"trying to remove a missed SipProviderExceptionListener.");
+    public synchronized void removeExceptionListener(SipProviderExceptionListener listener) {
+//        Log.v(TAG, "removing a SipProviderExceptionListener");
+        if (!exception_listeners.contains(listener)) {
+//            Log.v(TAG,"trying to remove a missed SipProviderExceptionListener.");
         }
         else
         {  exception_listeners.removeElement(listener);
@@ -693,8 +693,8 @@ public class SipProvider implements Configurable, TransportListener {
      * @return Returns a TransportConnId in case of connection-oriented delivery
      * (e.g. TCP) or null in case of connection-less delivery (e.g. UDP)
      */
-    public TransportConnId sendMessage(Message msg)
-    {  Log.v(TAG, "Sending message:\r\n"+msg.toString());
+    public TransportConnId sendMessage(Message msg) {
+//        Log.v(TAG, "Sending message:\r\n"+msg.toString());
 
         // select the transport protocol
         ViaHeader via=msg.getViaHeader();
@@ -739,7 +739,7 @@ public class SipProvider implements Configurable, TransportListener {
                 msg.removeViaHeader();
                 msg.addViaHeader(via);
             }
-            Log.v(TAG, "using transport "+proto);
+//            Log.v(TAG, "using transport "+proto);
         }
         else
         {  // RESPONSES
@@ -773,7 +773,8 @@ public class SipProvider implements Configurable, TransportListener {
      * (e.g. TCP) or null in case of connection-less delivery (e.g. UDP)
      */
     public TransportConnId sendMessage(Message msg, String proto, String dest_addr, int dest_port, int ttl)
-    {  if (log_all_packets || msg.getLength()>MIN_MESSAGE_LENGTH) Log.v(TAG, "Resolving host address '"+dest_addr+"'");
+    {
+//        if (log_all_packets || msg.getLength()>MIN_MESSAGE_LENGTH) Log.v(TAG, "Resolving host address '"+dest_addr+"'");
         try
         {  IpAddress dest_ipaddr=IpAddress.getByName(dest_addr);
             return sendMessage(msg,proto,dest_ipaddr,dest_port,ttl);
@@ -786,7 +787,8 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** Sends a Message, specifing the transport portocol, nexthop address and port. */
     private TransportConnId sendMessage(Message msg, String proto, IpAddress dest_ipaddr, int dest_port, int ttl)
-    {  if (log_all_packets || msg.getLength()>MIN_MESSAGE_LENGTH) Log.v(TAG, "Sending message to "+(new TransportConnId(proto,dest_ipaddr,dest_port)).toString());
+    {
+//        if (log_all_packets || msg.getLength()>MIN_MESSAGE_LENGTH) Log.v(TAG, "Sending message to "+(new TransportConnId(proto,dest_ipaddr,dest_port)).toString());
 
         TransportConn conn=null;
         try
@@ -795,7 +797,8 @@ public class SipProvider implements Configurable, TransportListener {
             {  conn=transp.sendMessage(msg,dest_ipaddr,dest_port,ttl);
             }
             else
-            {  Log.v(TAG,"Unsupported protocol ("+proto+"): Message discarded");
+            {
+//                Log.v(TAG,"Unsupported protocol ("+proto+"): Message discarded");
                 return null;
             }
         }
@@ -804,7 +807,7 @@ public class SipProvider implements Configurable, TransportListener {
             return null;
         }
         // logs
-        Log.v(TAG, msg.toString());
+        Log.v(TAG, "Message sent:\n"+msg.toString());
 
         if (conn!=null) return new TransportConnId(conn);
         else return null;
@@ -813,8 +816,9 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** Sends the message <i>msg</i> using the specified transport connection. */
     public TransportConnId sendMessage(Message msg, TransportConnId conn_id)
-    {  if (log_all_packets || msg.getLength()>MIN_MESSAGE_LENGTH) Log.v(TAG, "Sending message through conn "+conn_id);
-        Log.v(TAG, "message:\r\n"+msg.toString());
+    {
+//        if (log_all_packets || msg.getLength()>MIN_MESSAGE_LENGTH) Log.v(TAG, "Sending message through conn "+conn_id);
+//        Log.v(TAG, "message:\r\n"+msg.toString());
         TransportConn conn=null;
         for (Enumeration e=sip_transports.elements(); e.hasMoreElements() && conn==null; )
         {  Transport transp=(Transport)e.nextElement();
@@ -822,7 +826,7 @@ public class SipProvider implements Configurable, TransportListener {
         }
         if (conn!=null)
         {  // logs
-            Log.v(TAG, msg.toString());
+            Log.v(TAG, "Message sent:\n"+msg.toString());
 
             return new TransportConnId(conn);
         }
@@ -838,7 +842,7 @@ public class SipProvider implements Configurable, TransportListener {
     public synchronized void onReceivedMessage(Transport transport, Message msg)
     {  try
     {  // logs
-        Log.v(TAG, msg.toString());
+        Log.v(TAG, "Received message:\n" + msg.toString());
 
         // discard too short messages
         if (msg.getLength()<=2)
@@ -851,8 +855,8 @@ public class SipProvider implements Configurable, TransportListener {
         {  if (log_all_packets) Log.v(TAG, "NOT a SIP message: discarded\r\n");
             return;
         }
-        Log.v(TAG, "received new SIP message");
-        Log.v(TAG, "message:\r\n"+msg.toString());
+//        Log.v(TAG, "received new SIP message");
+//        Log.v(TAG, "message:\r\n"+msg.toString());
 
         // if a request, handle "received" and "rport" parameters
         if (msg.isRequest())
@@ -895,7 +899,7 @@ public class SipProvider implements Configurable, TransportListener {
         // try to look for listeners in promiscuous mode
         for (int i=0; i<promiscuous_listeners.size(); i++)
         {  SipProviderListener listener=(SipProviderListener)promiscuous_listeners.elementAt(i);
-            Log.v(TAG, "message passed to promiscuous listener");
+//            Log.v(TAG, "message passed to promiscuous listener");
             listener.onReceivedMessage(this,msg);
         }
 
@@ -912,9 +916,9 @@ public class SipProvider implements Configurable, TransportListener {
         SipId key;
         // pass requests to transaction servers and response to transaction clients
         if (msg.isRequest()) key=msg.getTransactionServerId(); else key=msg.getTransactionClientId();
-        Log.v(TAG, "transaction-id: "+key);
+//        Log.v(TAG, "transaction-id: "+key);
         if (sip_listeners.containsKey(key)) {
-            Log.v(TAG, "message passed to transaction: "+key);
+//            Log.v(TAG, "message passed to transaction: "+key);
             SipProviderListener lis = (SipProviderListener) sip_listeners.get(key);
             if(lis != null) {
 //                Log.v(TAG, lis.getClass().toString());
@@ -924,16 +928,18 @@ public class SipProvider implements Configurable, TransportListener {
         }
         // try to look for a dialog
         key=msg.getDialogId();
-        Log.v(TAG, "dialog-id: "+key);
+//        Log.v(TAG, "dialog-id: "+key);
         if (sip_listeners.containsKey(key))
-        {  Log.v(TAG, "message passed to dialog: "+key);
+        {
+//            Log.v(TAG, "message passed to dialog: "+key);
             ((SipProviderListener)sip_listeners.get(key)).onReceivedMessage(this,msg);
             return;
         }
         // try to look for a UAS
         key=msg.getMethodId();
         if (sip_listeners.containsKey(key))
-        {  Log.v(TAG, "message passed to uas: "+key);
+        {
+//            Log.v(TAG, "message passed to uas: "+key);
             ((SipProviderListener)sip_listeners.get(key)).onReceivedMessage(this,msg);
             return;
         }

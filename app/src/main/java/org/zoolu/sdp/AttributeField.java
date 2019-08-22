@@ -24,9 +24,6 @@
 package org.zoolu.sdp;
 
 
-import org.zoolu.tools.Parser;
-
-
 /** SDP attribute field.
  * <p>
  * <BLOCKQUOTE><PRE>
@@ -36,13 +33,13 @@ import org.zoolu.tools.Parser;
 public class AttributeField extends SdpField
 {
     /** Creates a new AttributeField. */
-    public AttributeField(String attribute)
-    {  super('a',attribute);
+    public AttributeField(String attribute) {
+        super('a',attribute);
     }
 
     /** Creates a new AttributeField. */
-    public AttributeField(String attribute, String a_value)
-    {  super('a',attribute+":"+a_value);
+    public AttributeField(String attribute, String a_value) {
+        super('a',attribute+":"+a_value);
     }
 
     /** Creates a new AttributeField. */

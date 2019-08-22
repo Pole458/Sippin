@@ -34,24 +34,22 @@ import org.zoolu.tools.Timer;
   * SipStack attributes are: the default SIP port, default supported transport protocols,
   * timeouts, log configuration, etc.
   */
-public class SipStack extends Configure
-{
+public class SipStack extends Configure {
+
    // ********************** private attributes **********************
 
    /** Whether SipStack configuration has been already loaded */
-   private static boolean is_init=false;
+   private static boolean is_init = false;
 
-   /** The default SipProvider */
-   //private static SipProvider provider=null;
 
    // *********************** software release ***********************
 
    /** Version */
-   public static final String version="1.7";
+   public static final String version = "1.7";
    /** Release */
-   public static final String release="mjsip "+version;
+   public static final String release = "mjsip "+ version;
    /** Authors */
-   public static final String authors="Luca Veltri - University of Parma (Italy)";
+   public static final String authors = "Luca Veltri - University of Parma (Italy)";
 
    // ********************** static attributes ***********************
 
@@ -67,31 +65,31 @@ public class SipStack extends Configure
     * Note that this is not the port used by the running stack, but simply the standard default SIP port.
     * <br> Normally it sould be set to 5060 as defined by RFC 3261. Using a different value may cause
     * some problems when interacting with other unaware SIP UAs. */
-   public static int default_port=5060; 
+   public static int default_port = 5060;
    /** Default SIP port for TLS transport (SIPS).
     * Note that this is not the port used by the running stack, but simply the standard default SIPS port.
     * <br> Normally it sould be set to 5061 as defined by RFC 3261. Using a different value may cause
     * some problems when interacting with other unaware SIP UAs. */
-   public static int default_tls_port=5061; 
+   public static int default_tls_port = 5061;
    /** Default supported transport protocols. */
-   public static String[] default_transport_protocols={ SipProvider.PROTO_UDP, SipProvider.PROTO_TCP };
+   public static String[] default_transport_protocols = { SipProvider.PROTO_UDP, SipProvider.PROTO_TCP };
    /** Default max number of contemporary open transport connections. */
-   public static int default_nmax_connections=32;
+   public static int default_nmax_connections = 32;
    /** Whether adding 'rport' parameter on via header fields of outgoing requests. */
-   public static boolean use_rport=true;
+   public static boolean use_rport = true;
    /** Whether adding (forcing) 'rport' parameter on via header fields of incoming requests. */
-   public static boolean force_rport=false;
+   public static boolean force_rport = false;
 
    // ********************* transaction timeouts *********************
 
    /** starting retransmission timeout (milliseconds); called T1 in RFC2361; they suggest T1=500ms */
-   public static long retransmission_timeout=500;  
+   public static long retransmission_timeout = 500;
    /** maximum retransmission timeout (milliseconds); called T2 in RFC2361; they suggest T2=4sec */
-   public static long max_retransmission_timeout=4000;   
+   public static long max_retransmission_timeout = 4000;
    /** transaction timeout (milliseconds); RFC2361 suggests 64*T1=32000ms */
-   public static long transaction_timeout=32000;    
+   public static long transaction_timeout = 32000;
    /** clearing timeout (milliseconds); T4 in RFC2361; they suggest T4=5sec */
-   public static long clearing_timeout=5000;
+   public static long clearing_timeout = 5000;
 
    // ******************** general configurations ********************
 
@@ -195,25 +193,23 @@ public class SipStack extends Configure
   }
       
    /** Converts the entire object into lines (to be saved into the config file) */
-   protected String toLines()
-   {  // currently not implemented..
+   protected String toLines() {
+      // currently not implemented..
       return "SipStack/"+release;
    }
  
    /** Costructs a non-static SipStack */
-   private SipStack()
-   {  
+   private SipStack() {
    }
 
    /** Inits SipStack */
-   public static void init()
-   {  init(null);
+   public static void init() {
+      init(null);
    }
 
    /** Inits SipStack from the specified <i>file</i> */
-   public static void init(String file)
-   {  
-      (new SipStack()).loadFile(file);
+   public static void init(String file) {
+      new SipStack().loadFile(file);
             
       // user-agent info
       if (ua_info!=null && (ua_info.length()==0 || ua_info.equalsIgnoreCase(Configure.NONE) || ua_info.equalsIgnoreCase("NO-MyUA-INFO"))) ua_info=null;
@@ -230,8 +226,8 @@ public class SipStack extends Configure
    }
 
    /** Whether SipStack has been already initialized */
-   public static boolean isInit()
-   {  return is_init;
+   public static boolean isInit() {
+      return is_init;
    }      
 
 }

@@ -34,8 +34,8 @@ import java.util.Vector;
  *      media-field = "m=" media SP port ["/" integer] SP proto 1*(SP fmt) CRLF
  * </PRE></BLOCKQUOTE>
  */
-public class MediaField extends SdpField
-{
+public class MediaField extends SdpField {
+
     /** Creates a new MediaField. */
     public MediaField(String media_field)
     {  super('m',media_field);

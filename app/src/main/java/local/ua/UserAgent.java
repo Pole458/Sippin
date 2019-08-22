@@ -21,6 +21,7 @@
 
 package local.ua;
 
+import android.net.rtp.AudioCodec;
 import android.net.rtp.AudioStream;
 import android.util.Log;
 
@@ -86,7 +87,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     private Vector<String> media_sessions = new Vector<>();
 
     /** Current local media descriptions, as Vector of MediaDesc */
-    private Vector media_descs = null;
+    private Vector<MediaDesc> mediaDescs = null;
 
     /** MyUA listener */
     protected UserAgentListener listener = null;
@@ -133,8 +134,8 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
         try {
             audioStream = new AudioStream(InetAddress.getByName(ua_profile.getUserURI().getAddress().getHost()));
 
-            for(int i = 0; i < ua_profile.media_descs.size(); i++)
-                ((MediaDesc)ua_profile.media_descs.get(i)).setPort(audioStream.getLocalPort());
+            for(int i = 0; i < ua_profile.mediaDescs.size(); i++)
+                ua_profile.mediaDescs.get(i).setPort(audioStream.getLocalPort());
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
@@ -151,19 +152,19 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     /** Gets SessionDescriptor from Vector of MediaSpec. */
     private SessionDescriptor getSessionDescriptor(Vector media_descs) {
 
-        String owner=ua_profile.user;
-        String media_addr=(ua_profile.media_addr!=null)? ua_profile.media_addr : sip_provider.getViaAddress();
-        int media_port=ua_profile.media_port;
-        SessionDescriptor sd=new SessionDescriptor(owner,media_addr);
+        String owner = ua_profile.user;
+        String media_addr = (ua_profile.media_addr != null) ? ua_profile.media_addr : sip_provider.getViaAddress();
+        int media_port = ua_profile.media_port;
+        SessionDescriptor sd = new SessionDescriptor(owner, media_addr);
 
         for (int i = 0; i < media_descs.size(); i++) {
-            MediaDesc md=(MediaDesc)media_descs.elementAt(i);
+            MediaDesc md = (MediaDesc)media_descs.elementAt(i);
             // check if audio or video have been disabled
             if (md.getMedia().equalsIgnoreCase("audio") && !ua_profile.audio) continue;
             if (md.getMedia().equalsIgnoreCase("video") && !ua_profile.video) continue;
             // else
-            if (media_port>0)
-            {  // override the media_desc port
+            if (media_port>0) {
+                // override the media_desc port
                 md.setPort(media_port);
                 media_port+=2;
             }
@@ -275,9 +276,9 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
     }
 
     /** Makes a new call (acting as UAC) with specific media description (Vector of MediaDesc). */
-    public void call(String callee, Vector media_descs) {
+    public void call(String callee, Vector<MediaDesc> mediaDescs) {
         // in case of incomplete url (e.g. only 'user' is present), try to complete it
-        call(completeNameAddress(callee), media_descs);
+        call(completeNameAddress(callee), mediaDescs);
     }
 
 
@@ -288,17 +289,20 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
 
 
     /** Makes a new call (acting as UAC) with specific media description (Vector of MediaDesc). */
-    public void call(NameAddress callee, Vector media_descs) {
+    public void call(NameAddress callee, Vector<MediaDesc> mediaDescs) {
         // new media description
-        if (media_descs == null)
-            media_descs = ua_profile.media_descs;
-        this.media_descs = media_descs;
+        if (mediaDescs == null)
+            mediaDescs = ua_profile.mediaDescs;
+        this.mediaDescs = mediaDescs;
+
         // new call
-        call = new ExtendedCall(sip_provider,ua_profile.getUserURI(),ua_profile.auth_user,ua_profile.auth_realm,ua_profile.auth_passwd,this);
+        call = new ExtendedCall(sip_provider, ua_profile.getUserURI(), ua_profile.auth_user, ua_profile.auth_realm,
+                ua_profile.auth_passwd,this);
+
         if(ua_profile.no_offer)
             call.call(callee);
         else {
-            SessionDescriptor local_sdp=getSessionDescriptor(media_descs);
+            SessionDescriptor local_sdp = getSessionDescriptor(mediaDescs);
             call.call(callee, local_sdp.toString());
         }
         progress = false;
@@ -327,7 +331,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
 
 
     /** Accepts an incoming call with specific media description (Vector of MediaDesc). */
-    public void accept(Vector media_descs) {
+    public void accept(Vector<MediaDesc> media_descs) {
 
         // response timeout
         if (response_to!=null)
@@ -337,14 +341,14 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
             return;
 
         if (media_descs == null)
-            media_descs = ua_profile.media_descs;
-        this.media_descs = media_descs;
+            media_descs = ua_profile.mediaDescs;
+        this.mediaDescs = media_descs;
         // new sdp
-        SessionDescriptor local_sdp=getSessionDescriptor(media_descs);
-        SessionDescriptor remote_sdp=new SessionDescriptor(call.getRemoteSessionDescriptor());
-        SessionDescriptor new_sdp=new SessionDescriptor(local_sdp.getOrigin(),remote_sdp.getSessionName(),local_sdp.getConnection(),remote_sdp.getTime());
+        SessionDescriptor local_sdp = getSessionDescriptor(media_descs);
+        SessionDescriptor remote_sdp = new SessionDescriptor(call.getRemoteSessionDescriptor());
+        SessionDescriptor new_sdp = new SessionDescriptor(local_sdp.getOrigin(),remote_sdp.getSessionName(),local_sdp.getConnection(),remote_sdp.getTime());
         new_sdp.addMediaDescriptors(local_sdp.getMediaDescriptors());
-        new_sdp=OfferAnswerModel.makeSessionDescriptorProduct(new_sdp,remote_sdp);
+        new_sdp = OfferAnswerModel.makeSessionDescriptorProduct(new_sdp, remote_sdp);
         // accept
         call.accept(new_sdp.toString());
     }
@@ -410,52 +414,56 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
         String remote_address = remote_sdp.getConnection().getAddress();
 
         // calculate media descriptor product
-        Vector md_list = OfferAnswerModel.makeMediaDescriptorProduct(local_sdp.getMediaDescriptors(), remote_sdp.getMediaDescriptors());
-        // select the media direction (send_only, recv_ony, fullduplex)
+        Vector<MediaDescriptor> md_list = OfferAnswerModel.makeMediaDescriptorProduct(local_sdp.getMediaDescriptors(),
+                remote_sdp.getMediaDescriptors());
 
+        // select the media direction (send_only, recv_ony, fullduplex)
         int dir = AudioStream.MODE_NORMAL;
         if (ua_profile.recv_only)
             dir = AudioStream.MODE_RECEIVE_ONLY;
         else if (ua_profile.send_only)
             dir = AudioStream.MODE_SEND_ONLY;
-        // for each media
 
+        // for each media
         for (Enumeration ei = md_list.elements(); ei.hasMoreElements(); ) {
             MediaField md = ((MediaDescriptor)ei.nextElement()).getMedia();
-            String media=md.getMedia();
+            String media = md.getMedia();
+
             // local and remote ports
-            int local_port=md.getPort();
-            int remote_port=remote_sdp.getMediaDescriptor(media).getMedia().getPort();
+            int local_port = md.getPort();
+            int remote_port = remote_sdp.getMediaDescriptor(media).getMedia().getPort();
             remote_sdp.removeMediaDescriptor(media);
+
             // media and flow specifications
             String transport = md.getTransport();
             String format = (String)md.getFormatList().elementAt(0);
+
             int avp = Integer.parseInt(format);
-            MediaSpec media_spec=null;
 
+            AudioCodec audioCodec = null;
 
-            for (int i=0; i<media_descs.size() && media_spec==null; i++) {
-                MediaDesc media_desc=(MediaDesc)media_descs.elementAt(i);
+            for (int i = 0; i < mediaDescs.size() && audioCodec == null; i++) {
+                MediaDesc media_desc = mediaDescs.elementAt(i);
                 if (media_desc.getMedia().equalsIgnoreCase(media)) {
-                    Vector media_specs=media_desc.getMediaSpecs();
-                    for (int j=0; j<media_specs.size() && media_spec==null; j++) {
-                        MediaSpec ms=(MediaSpec)media_specs.elementAt(j);
-                        if (ms.getAVP()==avp) media_spec=ms;
+                    Vector<AudioCodec> audioCodecs = media_desc.getAudioCodecs();
+                    for (int j = 0; j < audioCodecs.size() && audioCodec == null; j++) {
+                        AudioCodec codec = audioCodecs.elementAt(j);
+                        if (codec.type == avp) audioCodec = codec;
                     }
                 }
             }
 
-            if (local_port!=0 && remote_port!=0 && media_spec!=null) {
-                FlowSpec flow_spec = new FlowSpec(media_spec, local_port, remote_address, remote_port, dir);
-                Log.v(TAG, media+" format: "+flow_spec.getMediaSpec().getCodec());
-                boolean success=media_agent.startMediaSession(flow_spec, audioStream);
+            if (local_port != 0 && remote_port != 0 && audioCodec != null) {
+                FlowSpec flow_spec = new FlowSpec(audioCodec, local_port, remote_address, remote_port, dir);
+                Log.v(TAG, media + " format: " + flow_spec.getAudioCodec().rtpmap);
+                boolean success = media_agent.startMediaSession(flow_spec, audioStream);
                 if (success) {
                     media_sessions.addElement(media);
                     if (listener!=null)
                         listener.onUaMediaSessionStarted(this,media,format);
                 }
             } else {
-                Log.v(TAG, "DEBUG: media session cannot be started (local_port="+local_port+", remote_port="+remote_port+", media_spec="+media_spec+").");
+                Log.v(TAG, "DEBUG: media session cannot be started (local_port="+local_port+", remote_port="+remote_port+", media_spec="+audioCodec+").");
             }
         }
     }
@@ -561,13 +569,13 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
 
 
     /** From CallListener. Callback function called when arriving a 2xx (call accepted) */
-    public void onCallAccepted(Call call, String sdp, Message resp)
-    {  Log.v(TAG, "onCallAccepted()");
+    public void onCallAccepted(Call call, String sdp, Message resp) {
+        Log.v(TAG, "onCallAccepted()");
         if (call!=this.call && call!=call_transfer) {  Log.v(TAG, "NOT the current call");  return;  }
         Log.v(TAG, "ACCEPTED/CALL");
-        if (ua_profile.no_offer)
-        {  // new sdp
-            SessionDescriptor local_sdp=getSessionDescriptor(media_descs);
+        if (ua_profile.no_offer) {
+            // new sdp
+            SessionDescriptor local_sdp = getSessionDescriptor(mediaDescs);
             SessionDescriptor remote_sdp=new SessionDescriptor(sdp);
             SessionDescriptor new_sdp=new SessionDescriptor(local_sdp.getOrigin(),remote_sdp.getSessionName(),local_sdp.getConnection(),remote_sdp.getTime());
             new_sdp.addMediaDescriptors(local_sdp.getMediaDescriptors());
@@ -704,7 +712,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
         Log.v(TAG, "transfer to "+refer_to.toString());
         call.acceptTransfer();
         call_transfer=new ExtendedCall(sip_provider,ua_profile.getUserURI(),this);
-        call_transfer.call(refer_to,getSessionDescriptor(media_descs).toString());
+        call_transfer.call(refer_to,getSessionDescriptor(mediaDescs).toString());
     }
 
     /** From ExtendedCallListener. Callback function called when a call transfer is accepted. */

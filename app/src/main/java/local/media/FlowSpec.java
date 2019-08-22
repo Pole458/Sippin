@@ -1,32 +1,20 @@
 package local.media;
 
 
-
+import android.net.rtp.AudioCodec;
 
 /** Flow(s) specification.
  */
-public class FlowSpec
-{
-    /** Interface for characterizing media direction */
-    public static class Direction {}
-
-    /** Send only mode */
-    public static final Direction SEND_ONLY=new Direction();
-
-    /** Receive only mode */
-    public static final Direction RECV_ONLY=new Direction();
-
-    /** Full duplex mode */
-    public static final Direction FULL_DUPLEX=new Direction();
+public class FlowSpec {
 
     /** Media spec */
-    private MediaSpec media_spec;
+    private AudioCodec audioCodec;
 
     /** Local port */
     private int local_port;
 
     /** Remote address */
-    private String remote_addr;
+    private String remoteAddress;
 
     /** Remote port */
     private int remote_port;
@@ -36,17 +24,17 @@ public class FlowSpec
 
 
     /** Creates a new FlowSpec */
-    public FlowSpec(MediaSpec media_spec, int local_port, String remote_addr, int remote_port, int direction) {
-        this.media_spec=media_spec;
-        this.local_port=local_port;
-        this.remote_addr=remote_addr;
-        this.remote_port=remote_port;
-        this.direction=direction;
+    public FlowSpec(AudioCodec audioCodec, int local_port, String remote_addr, int remote_port, int direction) {
+        this.audioCodec = audioCodec;
+        this.local_port = local_port;
+        this.remoteAddress = remote_addr;
+        this.remote_port = remote_port;
+        this.direction = direction;
     }
 
     /** Gets media specification. */
-    public MediaSpec getMediaSpec() {
-        return media_spec;
+    public AudioCodec getAudioCodec() {
+        return audioCodec;
     }
 
 
@@ -58,7 +46,7 @@ public class FlowSpec
 
     /** Gets remote address. */
     public String getRemoteAddress() {
-        return remote_addr;
+        return remoteAddress;
     }
 
 

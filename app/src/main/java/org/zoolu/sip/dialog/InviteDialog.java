@@ -627,11 +627,10 @@ public class InviteDialog extends Dialog implements TransactionClientListener, I
             if (!(statusIs(D_INVITING) || statusIs(D_ReINVITING))) return;
             StatusLine statusline = msg.getStatusLine();
             int code = statusline.getCode();
-            // todo removed this in order to start the call
-//            if (code >= 200 && code < 300 && msg.getTransactionMethod().equals(SipMethods.INVITE)) {
-//                Log.v("Sip: InviteDialog", "Returning");
-//                return;
-//            }
+            if (!(code >= 200 && code < 300 && msg.getTransactionMethod().equals(SipMethods.INVITE))) {
+                Log.v("Sip:InviteDialog", "Returning");
+                return;
+            }
             boolean re_inviting = statusIs(D_ReINVITING);
             changeStatus(D_CALL);
             update(Dialog.UAC, msg);

@@ -25,7 +25,6 @@ import android.net.rtp.AudioStream;
 import android.util.Log;
 import com.pole.sippin.AndroidAudioApp;
 import local.media.FlowSpec;
-import local.media.LoopbackMediaApp;
 import local.media.MediaApp;
 
 import java.util.Hashtable;
@@ -44,7 +43,7 @@ class MediaAgent {
     private UserAgentProfile ua_profile;
 
     /** Active media applications, as table of: (String)media-->(MediaApp)media_app */
-    private Hashtable media_apps = new Hashtable();
+    private Hashtable<String, MediaApp> media_apps = new Hashtable<>();
 
     /** Creates a new MediaAgent. */
     MediaAgent(UserAgentProfile ua_profile) {
@@ -65,27 +64,28 @@ class MediaAgent {
     /** Starts a media session */
     boolean startMediaSession(FlowSpec flow_spec, AudioStream audioStream) {
 
-        Log.v(TAG, "start("+flow_spec.getMediaSpec()+")");
+        Log.v(TAG, "start("+flow_spec.getAudioCodec()+")");
         Log.v(TAG, "new flow: "+flow_spec.getLocalPort()+((flow_spec.getDirection()==AudioStream.MODE_SEND_ONLY)? "=-->" : ((flow_spec.getDirection()==AudioStream.MODE_RECEIVE_ONLY)? "<--=" : "<-->" ))+flow_spec.getRemoteAddress()+":"+flow_spec.getRemotePort());
 
-        String media = flow_spec.getMediaSpec().getType();
+        // start new media_app
+        MediaApp media_app;
+
+        String media = "audio";
 
         // stop previous media_app (just in case something was wrong..)
         if (media_apps.containsKey(media)) {
-            ((MediaApp)media_apps.get(media)).stopApp();
+            media_apps.get(media).stopApp();
             media_apps.remove(media);
         }
 
-        // start new media_app
-        MediaApp media_app = null;
-
         media_app = newAudioApp(flow_spec, audioStream);
 
+        //todo reimplement other MediaApp
 //        if (ua_profile.loopback)
 //            media_app = new LoopbackMediaApp(flow_spec);
-//        else if (flow_spec.getMediaSpec().getType().equals("audio"))
+//        else if (flow_spec.getAudioCodec().getType().equals("audio"))
 //            media_app = newAudioApp(flow_spec);
-//        else if (flow_spec.getMediaSpec().getType().equals("video"))
+//        else if (flow_spec.getAudioCodec().getType().equals("video"))
 //            media_app = newVideoApp(flow_spec);
 
         if (media_app != null) {
@@ -103,12 +103,11 @@ class MediaAgent {
     void stopMediaSession(String media) {
         Log.v(TAG, "stop("+media+")");
 
-        if (media_apps.containsKey(media))
-        {  ((MediaApp)media_apps.get(media)).stopApp();
+        if (media_apps.containsKey(media)) {
+            media_apps.get(media).stopApp();
             media_apps.remove(media);
-        }
-        else
-        {  Log.v(TAG, "WARNING: no running "+media+" application has been found.");
+        } else {
+            Log.v(TAG, "WARNING: no running "+media+" application has been found.");
         }
     }
 
@@ -117,7 +116,7 @@ class MediaAgent {
     /** Creates a new audio application. */
     private MediaApp newAudioApp(FlowSpec audio_flow, AudioStream audioStream) {
 
-        MediaApp audio_app = null;
+        MediaApp audio_app;
 
 //        // audio input
 //        String audio_in = null;
@@ -130,10 +129,7 @@ class MediaAgent {
 //        if (ua_profile.recv_file != null)
 //            audio_out = ua_profile.recv_file;
 
-        // Android audio app
-        if (ua_profile.javax_sound_app == null) {
-            audio_app = new AndroidAudioApp(audio_flow, ua_profile.javax_sound_sync, ua_profile.random_early_drop_rate, ua_profile.symmetric_rtp, audioStream);
-        }
+        audio_app = new AndroidAudioApp(audio_flow, audioStream);
 
         return audio_app;
     }
@@ -145,7 +141,7 @@ class MediaAgent {
 //
 //      /*if (ua_profile.use_vic) {
 //         // use VIC
-//         if (ua_profile.video_mcast_soaddr!=null) video_flow=new FlowSpec(video_flow.getMediaSpec(),ua_profile.video_mcast_soaddr.getPort(),ua_profile.video_mcast_soaddr.getAddress().toString(),ua_profile.video_mcast_soaddr.getPort(),video_flow.getDirection());
+//         if (ua_profile.video_mcast_soaddr!=null) video_flow=new FlowSpec(video_flow.getAudioCodec(),ua_profile.video_mcast_soaddr.getPort(),ua_profile.video_mcast_soaddr.getAddress().toString(),ua_profile.video_mcast_soaddr.getPort(),video_flow.getDirection());
 //         video_app=new VicVideoApp(ua_profile.bin_vic,video_flow);
 //      }
 //      else if (ua_profile.use_jmf_video) {  // use JMF video app

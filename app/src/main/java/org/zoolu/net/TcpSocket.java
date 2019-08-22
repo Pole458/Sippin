@@ -71,23 +71,6 @@ public class TcpSocket
     {  socket=new Socket(ipaddr.getInetAddress(),port,local_ipaddr.getInetAddress(),local_port);
     }
 
-    /** Whether the socket is connected. */
-    public boolean isConnected()
-    {  try
-    {  // if java4 VM (e.g. jdk1.4) or later, use Socket's method 'isConnected()'
-        return ((Boolean)Class.forName("Socket").getMethod("isConnected",null).invoke(socket,null)).booleanValue();
-    }
-    catch (ClassNotFoundException e) {}
-    catch (Exception e) {}
-        // else
-        try
-        {  return socket.getInputStream()!=null;
-        }
-        catch (Exception e) {}
-        // else
-        return false;
-    }
-
     /** Closes this socket. */
     public void close() throws java.io.IOException
     {  socket.close();
