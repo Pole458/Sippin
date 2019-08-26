@@ -24,6 +24,9 @@
 package org.zoolu.sip.provider;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.text.TextUtils;
 import android.util.Log;
 import org.zoolu.net.IpAddress;
 import org.zoolu.sip.address.SipURL;
@@ -99,7 +102,7 @@ public class SipProvider implements Configurable, TransportListener {
     public static final String PROTO_SCTP="sctp";
 
     /** String value "auto-configuration" used for auto configuration of the host address. */
-    public static final String AUTO_CONFIGURATION="AUTO-CONFIGURATION";
+    private static final String AUTO_CONFIGURATION="AUTO-CONFIGURATION";
 
     /** String value "auto-configuration" used for auto configuration of the host address. */
     private static final String ALL_INTERFACES="ALL-INTERFACES";
@@ -141,27 +144,27 @@ public class SipProvider implements Configurable, TransportListener {
     private SipURL outbound_proxy = null;
 
     /** Whether logging all packets (including non-SIP keepalive tokens). */
-    boolean log_all_packets=false;
+    private boolean log_all_packets=false;
 
 
     /** For TLS. Whether all client and server certificates should be considered trusted.
      * By default, trust_all=false. */
-    public boolean trust_all=false;
+    private boolean trust_all=false;
 
     /** For TLS. Path of the folder where trusted certificates are placed.
      * All certificates (with file extension ".crt") found in this folder are considered trusted.
      * By default, the folder "./cert" is used. */
-    public String trust_folder="cert";
+    private String trust_folder="cert";
 
     /** For TLS. Absolute file name of the certificate (containing the public key) of the local node.
      * The file name includes the full path starting from the current working folder.
      * By default, the file "./cert/ssl.crt" is used. */
-    public String cert_file="cert/ssl.crt";
+    private String cert_file="cert/ssl.crt";
 
     /** For TLS. Absolute file name of the private key of the local node.
      * The file name includes the full path starting from the current working folder.
      * By default, the file "./cert/ssl.key" is used. */
-    public String key_file="cert/ssl.key";
+    private String key_file="cert/ssl.key";
 
 
     // for backward compatibility:
@@ -175,72 +178,43 @@ public class SipProvider implements Configurable, TransportListener {
     // ************************ Other attributes *************************
 
     /** Network interface (IP address) used by SIP. */
-    IpAddress host_ipaddr=null;
+    private IpAddress host_ipaddr=null;
 
     /** Table of supported transport layers for SIP, as table:(String)protocol-->(Transport)transport. */
-    Hashtable sip_transports=null;
+    private Hashtable sip_transports=null;
 
     /** Default transport */
-    String default_transport=null;
+    private String default_transport=null;
 
     /** Whether adding 'rport' parameter on outgoing requests. */
-    boolean rport=true;
+    private boolean rport=true;
 
     /** Whether forcing 'rport' parameter on incoming requests ('force-rport' mode). */
-    boolean force_rport=false;
+    private boolean force_rport=false;
 
     /** Table of sip listeners as Hashtable:(SipId)id-->(SipProviderListener)listener */
-    Hashtable sip_listeners=new Hashtable();
+    private Hashtable sip_listeners=new Hashtable();
 
     /** Vector of promiscuous listeners */
-    Vector promiscuous_listeners=new Vector();
+    private Vector promiscuous_listeners=new Vector();
 
     /** Vector of exception listeners */
-    Vector exception_listeners=new Vector();
+    private Vector exception_listeners=new Vector();
 
 
 
     // *************************** Costructors ***************************
 
-    /** Creates a void SipProvider. */
-   /*protected SipProvider()
-   {  
-   }*/
-
-    /** Creates a new SipProvider. */
-    public SipProvider(String via_addr, int host_port) {
-        init(via_addr, host_port);
-        initSipTrasport(transport_protocols,null,null);
-    }
-
 
     /** Creates a new SipProvider.
      * Costructs the SipProvider, initializing the SipProviderListeners, the transport protocols, and other attributes. */
-    public SipProvider(String via_addr, int host_port, String[] transport_protocols, String ifaddr)
-    {  init(via_addr,host_port);
-
-        initSipTrasport(transport_protocols,null,host_ifaddr);
-    }
-
-
-    /** Creates a new SipProvider.
-     * Costructs the SipProvider, initializing the SipProviderListeners, the transport protocols, and other attributes. */
-    public SipProvider(String via_addr, int host_port, String[] transport_protocols, int[] transport_ports, String ifaddr)
-    {  init(via_addr,host_port);
-
-        initSipTrasport(transport_protocols,transport_ports,host_ifaddr);
-    }
-
-
-    /** Creates a new SipProvider.
-     * Costructs the SipProvider, initializing the SipProviderListeners, the transport protocols, and other attributes. */
-    public SipProvider(String via_addr, int host_port, Transport[] sip_transports)
-    {  init(via_addr,host_port);
+    public SipProvider(String via_addr, int host_port, Transport[] sip_transports, Context context) {
+        init(via_addr,host_port, context);
 
         // init transport
         this.sip_transports=new Hashtable();
-        if (sip_transports!=null)
-        {  for (int i=0; i<sip_transports.length; i++) setTransport(sip_transports[i]);
+        if (sip_transports!=null) {
+            for (Transport sip_transport : sip_transports) setTransport(sip_transport);
             if (sip_transports.length>0) default_transport=sip_transports[0].getProtocol();
         }
     }
@@ -248,23 +222,25 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** Creates a new SipProvider.
      * The SipProvider attributres are read from file. */
-    public SipProvider(String file)
-    {  if (!SipStack.isInit()) SipStack.init(file);
-        new Configure(this,file);
-        init(via_addr,host_port);
-        initSipTrasport(transport_protocols,transport_ports,host_ifaddr);
+    public SipProvider(Context context) {
+
+        if (!SipStack.isInit())
+            SipStack.init(context);
+
+        readAll(context);
+        init(via_addr, host_port, context);
+        initSipTrasport(transport_protocols, transport_ports, host_ifaddr);
     }
 
 
     /** Inits the SipProvider, initializing the SipProviderListeners, the transport protocols, the outbound proxy, and other attributes. */
-    private void init(String via_addr, int host_port) {
-        if (!SipStack.isInit()) SipStack.init();
+    private void init(String via_addr, int host_port, Context context) {
+        if (!SipStack.isInit()) SipStack.init(context);
         if (via_addr == null || via_addr.equalsIgnoreCase(AUTO_CONFIGURATION)) {
             via_addr = IpAddress.getLocalHostAddress().toString();
         }
 
         this.via_addr = via_addr;
-        if (host_port<=0) host_port=SipStack.default_port;
         if (host_port<=0) host_port=SipStack.default_port;
         this.host_port=host_port;
         rport=SipStack.use_rport;
@@ -273,7 +249,7 @@ public class SipProvider implements Configurable, TransportListener {
         // just for backward compatibility..
         if (outbound_port<0) outbound_port=SipStack.default_port;
         if (outbound_addr!=null)
-        {  if (outbound_addr.equalsIgnoreCase(Configure.NONE) || outbound_addr.equalsIgnoreCase("NO-OUTBOUND")) outbound_proxy=null;
+        {  if (outbound_addr.equalsIgnoreCase("NONE") || outbound_addr.equalsIgnoreCase("NO-OUTBOUND")) outbound_proxy=null;
         else outbound_proxy=new SipURL(outbound_addr,outbound_port);
         }
     }
@@ -367,58 +343,56 @@ public class SipProvider implements Configurable, TransportListener {
         exception_listeners=new Vector();
     }
 
+    public void readAll(Context context) {
 
-    /** From Configurable. Parses a single line (loaded from the config file). */
-    public void parseLine(String line)
-    {  String attribute;
-        Parser par;
-        int index=line.indexOf("=");
-        if (index>0) {  attribute=line.substring(0,index).trim(); par=new Parser(line,index+1);  }
-        else {  attribute=line; par=new Parser("");  }
-        char[] delim={' ',','};
+        SharedPreferences prefs = context.getSharedPreferences("SipStack", Context.MODE_PRIVATE);
 
-        if (attribute.equals("via_addr")) {  via_addr=par.getString(); return;  }
-        if (attribute.equals("host_port")) {  host_port=par.getInt(); return;  }
-        if (attribute.equals("host_ifaddr")) {  host_ifaddr=par.getString(); return;  }
-        if (attribute.equals("transport_protocols")) {  transport_protocols=par.getWordArray(delim); return;  }
-        if (attribute.equals("transport_ports")) {  transport_ports=par.getIntArray(); return;  }
-        if (attribute.equals("nmax_connections")) {  nmax_connections=par.getInt(); return;  }
-        if (attribute.equals("outbound_proxy"))
-        {  String url=par.getString();
-            if (url==null || url.length()==0 || url.equalsIgnoreCase(Configure.NONE) || url.equalsIgnoreCase("NO-OUTBOUND")) outbound_proxy=null;
-            else outbound_proxy=new SipURL(url);
-            return;
+        via_addr = prefs.getString("via_addr", via_addr);
+        host_port = prefs.getInt("host_port", host_port);
+        host_ifaddr = prefs.getString("host_ifaddr", host_ifaddr);
+
+        String tp = prefs.getString("transport_protocols", transport_protocols == null ? null : TextUtils.join(",", transport_protocols));
+        if(tp == null) transport_protocols = null;
+        else transport_protocols = tp.split(",");
+
+        if(transport_ports != null) {
+            String[] stpotrs = new String[transport_ports.length];
+            for (int i = 0; i < transport_ports.length; i++) {
+                stpotrs[i] = ""+transport_ports[i];
+            }
+            String tports = prefs.getString("transport_ports", TextUtils.join(",", stpotrs));
+            stpotrs = tports.split(",");
+            transport_ports = new int[stpotrs.length];
+            for (int i = 0; i < transport_ports.length; i++) {
+                transport_ports[i] = Integer.parseInt(stpotrs[i]);
+            }
+        } else {
+            String tports = prefs.getString("transport_ports", null);
+            if(tports == null) transport_ports = null;
+            else {
+                String [] stpotrs = tports.split(",");
+                transport_ports = new int[stpotrs.length];
+                for (int i = 0; i < transport_ports.length; i++) {
+                    transport_ports[i] = Integer.parseInt(stpotrs[i]);
+                }
+            }
         }
-        if (attribute.equals("log_all_packets")) { log_all_packets=(par.getString().toLowerCase().startsWith("y")); return; }
+
+        nmax_connections = prefs.getInt("nmax_connections", nmax_connections);
+        String url = prefs.getString("outbound_proxy", null);
+        if (url==null || url.length()==0 || url.equalsIgnoreCase("NONE") || url.equalsIgnoreCase("NO-OUTBOUND"))
+            outbound_proxy = null;
+        else
+            outbound_proxy = new SipURL(url);
+
+        log_all_packets = prefs.getBoolean("log_all_packets", log_all_packets);
 
         // certificates
-        if (attribute.equals("trust_all")){ trust_all=(par.getString().toLowerCase().startsWith("y")); return; }
-        if (attribute.equals("trust_folder")){ trust_folder=par.getRemainingString().trim(); return; }
-        if (attribute.equals("cert_file")){ cert_file=par.getRemainingString().trim(); return; }
-        if (attribute.equals("key_file")){ key_file=par.getRemainingString().trim(); return; }
+        trust_all = prefs.getBoolean("trust_all", trust_all);
+        trust_folder = prefs.getString("trust_folder", trust_folder);
+        cert_file = prefs.getString("cert_file", cert_file);
+        key_file = prefs.getString("key_file", key_file);
 
-        // old parameters
-        if (attribute.equals("host_addr")) System.err.println("WARNING: parameter 'host_addr' is no more supported; use 'via_addr' instead.");
-        if (attribute.equals("tls_port")) System.err.println("WARNING: parameter 'tls_port' is no more supported; use 'transport_ports' instead.");
-        if (attribute.equals("all_interfaces")) System.err.println("WARNING: parameter 'all_interfaces' is no more supported; use 'host_iaddr' for setting a specific interface or let it undefined.");
-        if (attribute.equals("use_outbound")) System.err.println("WARNING: parameter 'use_outbound' is no more supported; use 'outbound_proxy' for setting an outbound proxy or let it undefined.");
-        if (attribute.equals("outbound_addr"))
-        {  System.err.println("WARNING: parameter 'outbound_addr' has been deprecated; use 'outbound_proxy=[sip:]<host_addr>[:<host_port>][;transport=proto]' instead.");
-            outbound_addr=par.getString();
-            return;
-        }
-        if (attribute.equals("outbound_port"))
-        {  System.err.println("WARNING: parameter 'outbound_port' has been deprecated; use 'outbound_proxy=<host_addr>[:<host_port>]' instead.");
-            outbound_port=par.getInt();
-            return;
-        }
-    }
-
-
-    /** Converts the entire object into lines (to be saved into the config file) */
-    protected String toLines()
-    {  // currently not implemented..
-        return toString();
     }
 
 

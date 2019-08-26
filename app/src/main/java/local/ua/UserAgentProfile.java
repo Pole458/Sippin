@@ -1,16 +1,15 @@
 package local.ua;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.rtp.AudioCodec;
-import android.util.Log;
 import local.media.MediaDesc;
-import org.zoolu.net.SocketAddress;
 import org.zoolu.sip.address.NameAddress;
 import org.zoolu.sip.address.SipURL;
 import org.zoolu.sip.provider.SipProvider;
 import org.zoolu.sip.provider.SipStack;
-import org.zoolu.tools.Configure;
-import org.zoolu.tools.Parser;
+import org.zoolu.tools.Configurable;
 
 import java.util.Vector;
 
@@ -18,7 +17,7 @@ import java.util.Vector;
 
 /** UserAgentProfile maintains the user configuration.
  */
-public class UserAgentProfile extends Configure {
+public class UserAgentProfile implements Configurable {
 
     private static final String TAG = "Sip:UserAgentProfile";
 
@@ -27,7 +26,7 @@ public class UserAgentProfile extends Configure {
     /** Display name for the user.
      * It is used in the user's AOR registered to the registrar server
      * and used as From URL. */
-    public String display_name = null;
+    private String display_name = null;
 
     /** User's name.
      * It is used to build the user's AOR registered to the registrar server
@@ -49,25 +48,25 @@ public class UserAgentProfile extends Configure {
      * If <i>registrar</i> is not defined, the <i>proxy</i> value is used in its place.
      * <p/>
      * If <i>proxy</i> is not defined, the <i>registrar</i> value is used in its place. */
-    public String registrar = null;
+    String registrar = null;
 
     /** MyUA address.
      * It is the SIP address of the MyUA and is used to form the From URL if no proxy is configured. */
-    public String ua_address = null;
+    private String ua_address = null;
 
     /** User's name used for server authentication. */
-    public String auth_user = null;
+    String auth_user = null;
     /** User's realm used for server authentication. */
-    public String auth_realm = null;
+    String auth_realm = null;
     /** User's passwd used for server authentication. */
-    public String auth_passwd = null;
+    String auth_passwd = null;
 
     /** Whether registering with the registrar server */
-    public boolean do_register = false;
+    private boolean do_register = false;
     /** Whether unregistering the contact address */
-    public boolean do_unregister = false;
+    private boolean do_unregister = false;
     /** Whether unregistering all contacts before registering the contact address */
-    public boolean do_unregister_all = false;
+    private boolean do_unregister_all = false;
     /** Expires time (in seconds). */
     public int expires = 3600;
 
@@ -76,84 +75,67 @@ public class UserAgentProfile extends Configure {
      * Its value specifies the delta-time (in millesconds) between two
      * keep-alive tokens. <br/>
      * Set keepalive_time=0 for not sending keep-alive datagrams. */
-    public long keepalive_time=0;
+    private long keepalive_time=0;
 
-    /** Automatic call a remote user secified by the 'call_to' value.
+    /** Automatic call a remote user specified by the 'call_to' value.
      * Use value 'NONE' for manual calls (or let it undefined).  */
-    public NameAddress call_to = null;
+    private NameAddress call_to = null;
 
     /** Response time in seconds; it is the maximum time the user can wait before responding to an incoming call; after such time the call is automatically declined (refused). */
-    public int refuse_time = 20;
+    int refuse_time = 20;
     /** Automatic answer time in seconds; time<0 corresponds to manual answer mode. */
-    public int accept_time = -1;
+    private int accept_time = -1;
     /** Automatic hangup time (call duartion) in seconds; time<=0 corresponds to manual hangup mode. */
-    public int hangup_time = -1;
+    private int hangup_time = -1;
     /** Automatic call transfer time in seconds; time<0 corresponds to no auto transfer mode. */
-    public int transfer_time = -1;
+    private int transfer_time = -1;
     /** Automatic re-inviting time in seconds; time<0 corresponds to no auto re-invite mode.  */
-    public int re_invite_time = -1;
+    private int re_invite_time = -1;
 
     /** Redirect incoming call to the specified url.
      * Use value 'NONE' for not redirecting incoming calls (or let it undefined). */
-    public NameAddress redirect_to = null;
+    private NameAddress redirect_to = null;
 
     /** Transfer calls to the specified url.
      * Use value 'NONE' for not transferring calls (or let it undefined). */
-    public NameAddress transfer_to = null;
+    private NameAddress transfer_to = null;
 
     /** No offer in the invite */
-    public boolean no_offer = false;
+    boolean no_offer = false;
     /** Do not use prompt */
-    public boolean no_prompt = false;
+    private boolean no_prompt = false;
 
     /** Whether using audio */
-    public boolean audio = true;
+    boolean audio = true;
     /** Whether using video */
-    public boolean video = false;
+    boolean video = false;
 
     /** Whether looping the received media streams back to the sender. */
-    public boolean loopback = false;
+    private boolean loopback = false;
     /** Whether playing in receive only mode */
-    public boolean recv_only = false;
+    boolean recv_only = false;
     /** Whether playing in send only mode */
-    public boolean send_only = false;
+    boolean send_only = false;
     /** Whether playing a test tone in send only mode */
-    public boolean send_tone = false;
-    /** Audio file to be streamed */
-    public String send_file = null;
-    /** Audio file to be recorded */
-    public String recv_file = null;
-    /** Video file to be streamed */
-    public String send_video_file = null;
-    /** Video file to be recorded */
-    public String recv_video_file = null;
+    private boolean send_tone = false;
 
     /** Media address (use it if you want to use a media address different from the via address) */
-    public String media_addr = null;
+    String media_addr = null;
     /** First media port (use it if you want to use media ports different from those specified in mediaDescs) */
-    public int media_port = -1;
-
-    /** Whether using symmetric_rtp */
-    public boolean symmetric_rtp = false;
+    int media_port = -1;
 
     /** Vector of media descriptions (MediaDesc) */
-    public Vector<MediaDesc> mediaDescs = new Vector<>();
+    Vector<MediaDesc> mediaDescs = new Vector<>();
 
 
     // ******************** undocumented parametes ********************
 
     /** Whether running the UAS (User Agent Server), or acting just as UAC (User Agent Client). In the latter case only outgoing calls are supported. */
-    public boolean ua_server = true;
+    boolean ua_server = true;
     /** Whether running an Options Server, that automatically responds to OPTIONS requests. */
-    public boolean options_server = true;
+    boolean options_server = true;
     /** Whether running an Null Server, that automatically responds to not-implemented requests. */
-    public boolean null_server = true;
-
-    /** Fixed audio multicast socket address; if defined, it forces the use of this maddr+port for audio session */
-    public SocketAddress audio_mcast_soaddr = null;
-
-    /** Fixed video multicast socket address; if defined, it forces the use of this maddr+port for video session */
-    public SocketAddress video_mcast_soaddr = null;
+    private boolean null_server = true;
 
 
     // ********************* historical parametes *********************
@@ -166,15 +148,9 @@ public class UserAgentProfile extends Configure {
     // ************************** costructors *************************
 
     /** Constructs a void UserAgentProfile */
-    public UserAgentProfile() {
+    public UserAgentProfile(Context context) {
 
-        if (proxy!=null && proxy.equalsIgnoreCase(Configure.NONE)) proxy=null;
-        if (registrar!=null && registrar.equalsIgnoreCase(Configure.NONE)) registrar=null;
-        if (display_name!=null && display_name.equalsIgnoreCase(Configure.NONE)) display_name=null;
-        if (user!=null && user.equalsIgnoreCase(Configure.NONE)) user=null;
-        if (auth_realm!=null && auth_realm.equalsIgnoreCase(Configure.NONE)) auth_realm=null;
-        if (send_file!=null && send_file.equalsIgnoreCase(Configure.NONE)) send_file=null;
-        if (recv_file!=null && recv_file.equalsIgnoreCase(Configure.NONE)) recv_file=null;
+        readAll(context);
 
         Vector<AudioCodec> audioCodecs = new Vector<>();
         for(AudioCodec codec : AudioCodec.getCodecs()) {
@@ -221,11 +197,10 @@ public class UserAgentProfile extends Configure {
      * and <i>auth_user</i> attributes.
      * <p/>
      * Note: this method sets such attributes only if they haven't still been initilized. */
-    public void setUnconfiguredAttributes(SipProvider sip_provider) {
+    void setUnconfiguredAttributes(SipProvider sip_provider) {
         if (registrar==null && proxy!=null) registrar=proxy;
         if (proxy==null && registrar!=null) proxy=registrar;
         if (auth_realm==null && proxy!=null) auth_realm=proxy;
-        if (auth_realm==null && registrar!=null) auth_realm=registrar;
         if (auth_user==null && user!=null) auth_user=user;
         if (ua_address==null && sip_provider!=null)
         {  ua_address=sip_provider.getViaAddress();
@@ -235,96 +210,55 @@ public class UserAgentProfile extends Configure {
 
     // *********************** protected methods **********************
 
-    /** Parses a single line (loaded from the config file) */
-    protected void parseLine(String line) {
-        String attribute;
-        Parser par;
-        int index=line.indexOf("=");
-        if (index>0) {  attribute=line.substring(0,index).trim(); par=new Parser(line,index+1);  }
-        else {  attribute=line; par=new Parser("");  }
+    public void readAll(Context context) {
 
-        if (attribute.equals("display_name"))   {  display_name=par.getRemainingString().trim();  return;  }
-        if (attribute.equals("user"))           {  user=par.getString();  return;  }
-        if (attribute.equals("proxy"))          {  proxy=par.getString();  return;  }
-        if (attribute.equals("registrar"))      {  registrar=par.getString();  return;  }
+        SharedPreferences prefs = context.getSharedPreferences("SipStack", Context.MODE_PRIVATE);
 
-        if (attribute.equals("auth_user"))      {  auth_user=par.getString();  return;  }
-        if (attribute.equals("auth_realm"))     {  auth_realm=par.getRemainingString().trim();  return;  }
-        if (attribute.equals("auth_passwd"))    {  auth_passwd=par.getRemainingString().trim();  return;  }
+        display_name = prefs.getString("display_name", display_name);
+        user = prefs.getString("user", user);
+        proxy = prefs.getString("proxy", proxy);
+        registrar = prefs.getString("registrar", registrar);
+        auth_user = prefs.getString("auth_user", auth_user);
+        auth_realm = prefs.getString("auth_realm", auth_realm);
+        auth_passwd = prefs.getString("auth_passwd", auth_passwd);
 
-        if (attribute.equals("do_register"))    {  do_register=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("do_unregister"))  {  do_unregister=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("do_unregister_all")) {  do_unregister_all=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("expires"))        {  expires=par.getInt();  return;  }
-        if (attribute.equals("keepalive_time")) {  keepalive_time=par.getInt();  return;  }
+        do_register = prefs.getBoolean("do_register", do_register);
+        do_unregister = prefs.getBoolean("do_unregister", do_unregister);
+        do_unregister_all = prefs.getBoolean("do_unregister_all", do_unregister_all);
+        expires = prefs.getInt("expires", expires);
+        keepalive_time = prefs.getLong("keepalive_time", keepalive_time);
 
-        if (attribute.equals("call_to"))
-        {  String naddr=par.getRemainingString().trim();
-            if (naddr==null || naddr.length()==0 || naddr.equalsIgnoreCase(Configure.NONE)) call_to=null;
-            else call_to=new NameAddress(naddr);
-            return;
-        }
-        if (attribute.equals("redirect_to"))
-        {  String naddr=par.getRemainingString().trim();
-            if (naddr==null || naddr.length()==0 || naddr.equalsIgnoreCase(Configure.NONE)) redirect_to=null;
-            else redirect_to=new NameAddress(naddr);
-            return;
-        }
-        if (attribute.equals("transfer_to"))
-        {  String naddr=par.getRemainingString().trim();
-            if (naddr==null || naddr.length()==0 || naddr.equalsIgnoreCase(Configure.NONE)) transfer_to=null;
-            else transfer_to=new NameAddress(naddr);
-            return;
-        }
+        String naddr = prefs.getString("call_to", null);
+        if (naddr==null || naddr.length()==0 || naddr.equalsIgnoreCase("NONE")) call_to=null;
+        else call_to=new NameAddress(naddr);
 
-        if (attribute.equals("refuse_time"))    {  refuse_time=par.getInt();  return;  }
-        if (attribute.equals("accept_time"))    {  accept_time=par.getInt();  return;  }
-        if (attribute.equals("hangup_time"))    {  hangup_time=par.getInt();  return;  }
-        if (attribute.equals("transfer_time"))  {  transfer_time=par.getInt();  return;  }
-        if (attribute.equals("re_invite_time")) {  re_invite_time=par.getInt();  return;  }
-        if (attribute.equals("no_offer"))       {  no_offer=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("no_prompt"))      {  no_prompt=(par.getString().toLowerCase().startsWith("y"));  return;  }
+        naddr = prefs.getString("redirect_to", null);
+        if (naddr==null || naddr.length()==0 || naddr.equalsIgnoreCase("NONE")) redirect_to=null;
+        else redirect_to=new NameAddress(naddr);
 
-        if (attribute.equals("loopback"))       {  loopback=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("recv_only"))      {  recv_only=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("send_only"))      {  send_only=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("send_tone"))      {  send_tone=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("send_file"))      {  send_file=par.getRemainingString().trim();  return;  }
-        if (attribute.equals("recv_file"))      {  recv_file=par.getRemainingString().trim();  return;  }
-        if (attribute.equals("send_video_file")){  send_video_file=par.getRemainingString().trim();  return;  }
-        if (attribute.equals("recv_video_file")){  recv_video_file=par.getRemainingString().trim();  return;  }
+        naddr = prefs.getString("transfer_to", null);
+        if (naddr==null || naddr.length()==0 || naddr.equalsIgnoreCase("NONE"))transfer_to=null;
+        else transfer_to=new NameAddress(naddr);
 
-        if (attribute.equals("audio"))          {  audio=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("video"))          {  video=(par.getString().toLowerCase().startsWith("y"));  return;  }
+        refuse_time = prefs.getInt("refuse_time", refuse_time);
+        accept_time = prefs.getInt("accept_time", accept_time);
+        hangup_time = prefs.getInt("hangup_time", hangup_time);
+        transfer_time = prefs.getInt("transfer_time", transfer_time);
+        re_invite_time = prefs.getInt("re_invite_time", re_invite_time);
+        no_offer = prefs.getBoolean("no_offer", no_offer);
+        no_prompt = prefs.getBoolean("no_prompt", no_prompt);
+        loopback = prefs.getBoolean("loopback", loopback);
+        recv_only = prefs.getBoolean("recv_only", recv_only);
+        send_only = prefs.getBoolean("send_only", send_only);
+        send_tone = prefs.getBoolean("send_tone", send_tone);
 
-        if (attribute.equals("media_addr"))     {  media_addr=par.getString();  return;  }
-        if (attribute.equals("media_port"))     {  media_port=par.getInt();  return;  }
-        if (attribute.equals("symmetric_rtp"))  {  symmetric_rtp=(par.getString().toLowerCase().startsWith("y"));  return;  }
+        media_addr = prefs.getString("media_addr", media_addr);
+        media_port = prefs.getInt("media_port", media_port);
 
 
-        if (attribute.equals("ua_server")) {  ua_server=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("options_server")) {  options_server=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("null_server")) {  null_server=(par.getString().toLowerCase().startsWith("y"));  return;  }
-        if (attribute.equals("audio_mcast_soaddr")) {  audio_mcast_soaddr=new SocketAddress(par.getString());  return;  }
-        if (attribute.equals("video_mcast_soaddr")) {  video_mcast_soaddr=new SocketAddress(par.getString());  return;  }
+        ua_server = prefs.getBoolean("ua_server", ua_server);
+        options_server = prefs.getBoolean("options_server", options_server);
+        null_server = prefs.getBoolean("null_server", null_server);
 
-        // for backward compatibily
-        if (attribute.equals("from_url"))         {  setUserURI(new NameAddress(par.getRemainingString().trim()));  return;  }
-        if (attribute.equals("contact_user"))     {  user=par.getString();  return;  }
-        if (attribute.equals("auto_accept"))      {  accept_time=((par.getString().toLowerCase().startsWith("y")))? 0 : -1;  return;  }
-
-        if (attribute.equals("audio_port"))     {  audio_port=par.getInt();  return;  }
-        if (attribute.equals("video_port"))     {  video_port=par.getInt();  return;  }
-
-        // old parameters
-        if (attribute.equals("contact_url")) System.err.println("WARNING: parameter 'contact_url' is no more supported.");
-        if (attribute.equals("secure_contact_url")) System.err.println("WARNING: parameter 'secure_contact_url' is no more supported.");
-    }
-
-
-    /** Converts the entire object into lines (to be saved into the config file) */
-    protected String toLines() {
-        // currently not implemented..
-        return getUserURI().toString();
     }
 }

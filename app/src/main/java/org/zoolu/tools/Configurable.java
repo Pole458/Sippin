@@ -24,10 +24,11 @@
 package org.zoolu.tools;
 
 
+import android.content.Context;
 
 /** Configurable is the base interface for classes that can be configurated by a text file.
   */
 public interface Configurable {
    /** Parses a single text line. */
-   public void parseLine(String line);
+   void readAll(Context context);
 }

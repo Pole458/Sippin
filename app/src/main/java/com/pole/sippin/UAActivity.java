@@ -19,7 +19,7 @@ import local.ua.UserAgentListener;
 import local.ua.UserAgentProfile;
 import org.zoolu.sip.address.NameAddress;
 import org.zoolu.sip.provider.SipProvider;
-import org.zoolu.sip.provider.SipStack;
+
 
 import java.util.Vector;
 
@@ -68,8 +68,8 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         callButton.setOnClickListener(v -> call(numberTextView.getText().toString()));
         hangUpButton.setOnClickListener(v -> hangUp());
 
-        sip_provider = new SipProvider(SipProvider.AUTO_CONFIGURATION, SipStack.default_port);
-        ua_profile = new UserAgentProfile();
+        sip_provider = new SipProvider(getApplicationContext());
+        ua_profile = new UserAgentProfile(getApplicationContext());
 
         ua = new UserAgent(sip_provider, ua_profile,this);
         changeStatus(UA_IDLE);

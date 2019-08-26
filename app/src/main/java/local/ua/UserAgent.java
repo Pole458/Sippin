@@ -122,7 +122,7 @@ public class UserAgent extends CallListenerAdapter implements CallWatcherListene
             options_server = new OptionsServer(sip_provider,"INVITE, ACK, CANCEL, OPTIONS, BYE","application/sdp");
 
         // init media agent
-        media_agent = new MediaAgent(ua_profile);
+        media_agent = new MediaAgent();
 
         startAudioStream();
 
