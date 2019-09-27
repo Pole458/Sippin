@@ -171,8 +171,8 @@ public class InviteDialog extends Dialog implements TransactionClientListener, I
 
     /** Starts a new InviteTransactionClient
      * and initializes the dialog state information.
-     * @param target the callee url (optionally with the display name)
-     * @param from the caller url (optionally with the display name)
+     * @param target the callee url (optionally with the display rtpmap)
+     * @param from the caller url (optionally with the display rtpmap)
      * @param contact the contact url (null for default contact)
      * @param session_descriptor SDP body
      */

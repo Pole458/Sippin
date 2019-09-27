@@ -45,10 +45,10 @@ public class ExtendedCall extends Call implements ExtendedInviteDialogListener
     Message refer;
 
 
-    /** User name. */
+    /** User rtpmap. */
     String username;
 
-    /** User name. */
+    /** User rtpmap. */
     String realm;
 
     /** User's passwd. */

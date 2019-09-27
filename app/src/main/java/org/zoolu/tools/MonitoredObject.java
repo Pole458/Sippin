@@ -43,7 +43,7 @@ public class MonitoredObject
    static long exception_counter=0;
 
 
-   /** Class name of the current object */
+   /** Class rtpmap of the current object */
    String class_name;
 
 
@@ -51,7 +51,7 @@ public class MonitoredObject
    public MonitoredObject()
    {  try
       {  class_name=getClass().getName();
-         if (class_name==null) throw new MonitoredObjectException("Unknown class name.");
+         if (class_name==null) throw new MonitoredObjectException("Unknown class rtpmap.");
          else addObject(class_name);
       }
       catch (Exception e)

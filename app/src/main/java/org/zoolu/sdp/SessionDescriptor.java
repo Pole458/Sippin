@@ -54,7 +54,7 @@ public class SessionDescriptor
     SdpField v;
     /** Origin filed. */
     OriginField o;
-    /** Session-name filed. */
+    /** Session-rtpmap filed. */
     SessionNameField s;
     /** Connection filed. */
     ConnectionField c;
@@ -191,7 +191,7 @@ public class SessionDescriptor
         return o;
     }
 
-    /** Sets the session-name 's' field.
+    /** Sets the session-rtpmap 's' field.
      * @param session the SessionNameField
      * @return this SessionDescriptor */
     public SessionDescriptor setSessionName(SessionNameField session)
@@ -199,7 +199,7 @@ public class SessionDescriptor
         return this;
     }
 
-    /** Gets the session-name 's' field */
+    /** Gets the session-rtpmap 's' field */
     public SessionNameField getSessionName()
     {  return s;
     }
@@ -353,7 +353,7 @@ public class SessionDescriptor
     }
 
     /** Whether it has a particular attribute
-     * @param attribute_name the attribute name
+     * @param attribute_name the attribute rtpmap
      * @return true if found, otherwise returns null */
     public boolean hasAttribute(String attribute_name)
     {  for (int i=0; i<av.size(); i++)
@@ -362,8 +362,8 @@ public class SessionDescriptor
         return false;
     }
 
-    /** Gets the first AttributeField of a particular attribute name.
-     * @param attribute_name the attribute name
+    /** Gets the first AttributeField of a particular attribute rtpmap.
+     * @param attribute_name the attribute rtpmap
      * @return the AttributeField, or null if not found */
     public AttributeField getAttribute(String attribute_name)
     {  for (int i=0; i<media.size(); i++)
@@ -373,8 +373,8 @@ public class SessionDescriptor
         return null;
     }
 
-    /** Gets a Vector of attribute values of a particular attribute name.
-     * @param attribute_name the attribute name
+    /** Gets a Vector of attribute values of a particular attribute rtpmap.
+     * @param attribute_name the attribute rtpmap
      * @return a Vector of AttributeField */
     public Vector getAttributes(String attribute_name)
     {  Vector v=new Vector(av.size());

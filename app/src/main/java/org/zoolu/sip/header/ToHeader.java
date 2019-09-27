@@ -32,7 +32,7 @@ import org.zoolu.sip.address.*;
  * "logical" recipient of the request, or the address-of-record of the
  * user or resource that is the target of this request.  This may or may
  * not be the ultimate recipient of the request.  Like the From
- * header field, it contains a URI and optionally a display name.
+ * header field, it contains a URI and optionally a display rtpmap.
  * <BR> A request outside of a dialog MUST NOT contain a To tag; the tag in
  * the To field of a request identifies the peer of the dialog.  Since
  * no dialog is established, no tag is present.

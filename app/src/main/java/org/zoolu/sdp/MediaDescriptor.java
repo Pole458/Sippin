@@ -122,7 +122,7 @@ public class MediaDescriptor {
     }
 
     /** Whether it has a particular attribute.
-     * @param a_name the attribute name
+     * @param a_name the attribute rtpmap
      * @return true if found, otherwise returns null */
     public boolean hasAttribute(String a_name)
     {  for (int i=0; i<av.size(); i++)
@@ -132,7 +132,7 @@ public class MediaDescriptor {
     }
 
     /** Gets a particular attribute.
-     * @param a_name the attribute name
+     * @param a_name the attribute rtpmap
      * @return the AttributeField, or null if not found */
     public AttributeField getAttribute(String a_name)
     {  for (int i=0; i<av.size(); i++)
@@ -142,8 +142,8 @@ public class MediaDescriptor {
         return null;
     }
 
-    /** Gets a Vector of attribute values of a particular attribute name.
-     * @param a_name the attribute name
+    /** Gets a Vector of attribute values of a particular attribute rtpmap.
+     * @param a_name the attribute rtpmap
      * @return a Vector of AttributeFields */
     public Vector<AttributeField> getAttributes(String a_name) {
         Vector<AttributeField> v = new Vector<>(av.size());

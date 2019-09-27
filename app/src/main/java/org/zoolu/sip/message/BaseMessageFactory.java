@@ -54,7 +54,7 @@ public abstract class BaseMessageFactory
 {
 
     /** Creates a SIP request message.
-     * @param method      method name
+     * @param method      method rtpmap
      * @param request_uri request-uri
      * @param to          ToHeader NameAddress
      * @param from        FromHeader NameAddress
@@ -141,7 +141,7 @@ public abstract class BaseMessageFactory
      * <LI> via address and port are taken from SipProvider
      * <LI> transport protocol is taken from request-uri (if transport parameter is present)
      *      or the default transport for the SipProvider is used.
-     * <LI> contact is formed by the 'From' user-name and by the address and port taken from SipProvider
+     * <LI> contact is formed by the 'From' user-rtpmap and by the address and port taken from SipProvider
      * <LI> call_id is picked random
      * <LI> cseq is picked random
      * <LI> local_tag is picked random

@@ -74,11 +74,11 @@ public class RtpStreamSender extends Thread {
      * @param input_stream the stream source
      * @param do_sync whether time synchronization must be performed by the RtpStreamSender,
      *        or it is performed by the InputStream (e.g. by the system audio input)
-     * @param payload_type the payload type
+     * @param payload_type the type type
      * @param frame_rate the frame rate, i.e. the number of frames that should be sent per second;
      *        it is used to calculate the nominal packet time and, in case of do_sync==true,
     the next departure time
-     * @param frame_size the size of the payload
+     * @param frame_size the size of the type
      * @param dest_addr the destination address
      * @param dest_port the destination port */
     public RtpStreamSender(InputStream input_stream, boolean do_sync, int payload_type, long frame_rate, int frame_size, String dest_addr, int dest_port)
@@ -90,11 +90,11 @@ public class RtpStreamSender extends Thread {
      * @param input_stream the stream source
      * @param do_sync whether time synchronization must be performed by the RtpStreamSender,
      *        or it is performed by the InputStream (e.g. by the system audio input)
-     * @param payload_type the payload type
+     * @param payload_type the type type
      * @param frame_rate the frame rate, i.e. the number of frames that should be sent per second;
      *        it is used to calculate the nominal packet time and, in case of do_sync==true,
     the next departure time
-     * @param frame_size the size of the payload
+     * @param frame_size the size of the type
      * @param src_port the source port
      * @param dest_addr the destination address
      * @param dest_port the destination port */
@@ -107,11 +107,11 @@ public class RtpStreamSender extends Thread {
      * @param input_stream the stream to be sent
      * @param do_sync whether time synchronization must be performed by the RtpStreamSender,
      *        or it is performed by the InputStream (e.g. by the system audio input)
-     * @param payload_type the payload type
+     * @param payload_type the type type
      * @param frame_rate the frame rate, i.e. the number of frames that should be sent per second;
      *        it is used to calculate the nominal packet time and, in case of do_sync==true,
     the next departure time
-     * @param frame_size the size of the payload
+     * @param frame_size the size of the type
      * @param src_socket the socket used to send the RTP packet
      * @param dest_addr the destination address
      * @param dest_port the destination port */
@@ -198,7 +198,7 @@ public class RtpStreamSender extends Thread {
         running=true;
 
         if (DEBUG) println("RTP: localhost:"+rtp_socket.getUdpSocket().getLocalPort()+" --> "+rtp_socket.getRemoteAddress().toString()+":"+rtp_socket.getRemotePort());
-        if (DEBUG) println("RTP: sending pkts of "+(packet_buffer.length-12)+" bytes of RTP payload");
+        if (DEBUG) println("RTP: sending pkts of "+(packet_buffer.length-12)+" bytes of RTP type");
 
         try {
             while (running) {

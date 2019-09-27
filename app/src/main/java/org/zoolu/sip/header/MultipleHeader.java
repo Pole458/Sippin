@@ -130,7 +130,7 @@ public class MultipleHeader
         else return false;
     }
 
-    /** Gets name of Header */
+    /** Gets rtpmap of Header */
     public String getName()
     {  return name;
     }

@@ -37,7 +37,7 @@ import org.zoolu.sip.provider.SipParser;
 public abstract class EndPointHeader extends NameAddressHeader
 {
     /** EndPoint parameters that should be removed from the returned NameAddress.
-     * This tries to resolve a bug (?) of SIP when using SIP URL parameters in a name-address
+     * This tries to resolve a bug (?) of SIP when using SIP URL parameters in a rtpmap-address
      * within an EndPointHeader that may have some header parameters. */
     static final String[] ENDPOINT_PARAMS={"tag","expires"};
 

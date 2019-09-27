@@ -88,7 +88,7 @@ public class MediaField extends SdpField {
 
     /** Gets the media formats as a Vector of String. */
     public Vector getFormatList()
-    {  Vector formatlist=new Vector();
+    {  Vector<String> formatlist= new Vector<>();
         Parser par=new Parser(value);
         par.skipString().skipString().skipString();
         while (par.hasMore())

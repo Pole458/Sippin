@@ -56,7 +56,7 @@ public class OriginField extends SdpField
     {  super(sf);
     }
 
-    /** Gets the user name. */
+    /** Gets the user rtpmap. */
     public String getUserName()
     {  return (new Parser(value)).getString();
     }

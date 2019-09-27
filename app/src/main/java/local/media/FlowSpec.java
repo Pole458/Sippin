@@ -1,14 +1,14 @@
 package local.media;
 
 
-import android.net.rtp.AudioCodec;
+import com.pole.sippin.AndroidAudioCodec;
 
 /** Flow(s) specification.
  */
 public class FlowSpec {
 
     /** Media spec */
-    private AudioCodec audioCodec;
+    private AndroidAudioCodec audioCodec;
 
     /** Local port */
     private int local_port;
@@ -24,7 +24,7 @@ public class FlowSpec {
 
 
     /** Creates a new FlowSpec */
-    public FlowSpec(AudioCodec audioCodec, int local_port, String remote_addr, int remote_port, int direction) {
+    public FlowSpec(AndroidAudioCodec audioCodec, int local_port, String remote_addr, int remote_port, int direction) {
         this.audioCodec = audioCodec;
         this.local_port = local_port;
         this.remoteAddress = remote_addr;
@@ -33,7 +33,7 @@ public class FlowSpec {
     }
 
     /** Gets media specification. */
-    public AudioCodec getAudioCodec() {
+    public AndroidAudioCodec getAudioCodec() {
         return audioCodec;
     }
 

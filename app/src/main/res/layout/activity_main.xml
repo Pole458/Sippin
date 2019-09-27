@@ -63,10 +63,105 @@
 			android:layout_height="wrap_content"
 			android:text="sip:alice@192.168.1.90:5070"
 			android:id="@+id/numberEditText"
-			app:layout_constraintBottom_toTopOf="@+id/callButton"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintVertical_bias="0.5"
 			app:layout_constraintLeft_toLeftOf="parent"
 			app:layout_constraintRight_toRightOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/myNumberTextView"/>
+			app:layout_constraintTop_toTopOf="parent"/>
+
+
+	<CheckBox
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="PCMU"
+			android:textSize="18sp"
+			android:enabled="false"
+			android:id="@+id/pcmuCheckbox"
+			android:checked="true"
+			app:layout_constraintTop_toBottomOf="@+id/numberEditText"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintBottom_toTopOf="@+id/l8CheckBox"
+	/>
+
+	<CheckBox
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="L8"
+			android:textSize="18sp"
+			android:id="@+id/l8CheckBox"
+			android:checked="true"
+			app:layout_constraintTop_toBottomOf="@+id/pcmuCheckbox"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toLeftOf="@+id/l16CheckBox"
+			app:layout_constraintBottom_toTopOf="@+id/pcmaCheckBox"
+	/>
+
+	<CheckBox
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="L16"
+			android:textSize="18sp"
+			android:id="@+id/l16CheckBox"
+			android:checked="true"
+			app:layout_constraintTop_toTopOf="@+id/l8CheckBox"
+			app:layout_constraintLeft_toRightOf="@+id/l8CheckBox"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintBottom_toBottomOf="@+id/l8CheckBox"
+	/>
+
+	<CheckBox
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="PCMA"
+			android:textSize="18sp"
+			android:id="@+id/pcmaCheckBox"
+			android:checked="true"
+			app:layout_constraintTop_toBottomOf="@+id/l8CheckBox"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toLeftOf="@+id/amrCheckBox"
+			app:layout_constraintBottom_toTopOf="@+id/gsmCheckBox"
+	/>
+
+	<CheckBox
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="AMR"
+			android:textSize="18sp"
+			android:id="@+id/amrCheckBox"
+			android:checked="true"
+			app:layout_constraintTop_toTopOf="@+id/pcmaCheckBox"
+			app:layout_constraintLeft_toRightOf="@+id/pcmaCheckBox"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintBottom_toBottomOf="@+id/pcmaCheckBox"
+	/>
+
+	<CheckBox
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="GSM"
+			android:textSize="18sp"
+			android:id="@+id/gsmCheckBox"
+			android:checked="true"
+			app:layout_constraintTop_toBottomOf="@+id/pcmaCheckBox"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toLeftOf="@id/gsmEfrCheckBox"
+			app:layout_constraintBottom_toTopOf="@+id/callButton"
+	/>
+
+	<CheckBox
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="GSM-EFR"
+			android:textSize="18sp"
+			android:id="@+id/gsmEfrCheckBox"
+			android:checked="true"
+			app:layout_constraintTop_toBottomOf="@+id/gsmCheckBox"
+			app:layout_constraintLeft_toRightOf="@id/gsmCheckBox"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintBottom_toTopOf="@+id/gsmCheckBox"
+	/>
+
 
 	<ImageButton
 			android:layout_width="wrap_content"

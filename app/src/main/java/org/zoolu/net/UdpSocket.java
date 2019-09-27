@@ -24,6 +24,8 @@
 package org.zoolu.net;
 
 
+import android.os.Build;
+import android.system.ErrnoException;
 import android.util.Log;
 
 import java.net.DatagramSocket;

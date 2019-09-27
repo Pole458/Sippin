@@ -30,14 +30,14 @@ import org.zoolu.sip.provider.SipParser;
 
 
 /** Class <i>NameAddress</i> is used to rapresent any valid SIP Name Address.
-  * It contains a SIP URI and optionally a display name.
+  * It contains a SIP URI and optionally a display rtpmap.
   * <BR> A  SIP Name Address is a string of the form of:
-  * <BR><BLOCKQUOTE><PRE>&nbsp&nbsp [ display-name ] address
+  * <BR><BLOCKQUOTE><PRE>&nbsp&nbsp [ display-rtpmap ] address
   * <BR>&nbsp&nbsp where address can be a valid SIP URL</PRE></BLOCKQUOTE>
 */
 public class NameAddress
 {
-   /** Display name. */
+   /** Display rtpmap. */
    String name;
 
    /** URL. */
@@ -91,17 +91,17 @@ public class NameAddress
    {  return url;
    }
 
-   /** Gets display name (returns null id display name does not exist). */
+   /** Gets display rtpmap (returns null id display rtpmap does not exist). */
    public String getDisplayName()
    {  return name;
    }
 
-   /** Whether there is a display name. */
+   /** Whether there is a display rtpmap. */
    public boolean hasDisplayName()
    {  return name!=null;
    }
 
-   /** Removes display name (if present). */
+   /** Removes display rtpmap (if present). */
    public void removeDisplayName()
    {  name=null;
    }
@@ -111,7 +111,7 @@ public class NameAddress
    {  this.url=url;
    }
 
-   /** Sets display name. */
+   /** Sets display rtpmap. */
    public void setDisplayName(String display_name)
    {  this.name=display_name;
    }

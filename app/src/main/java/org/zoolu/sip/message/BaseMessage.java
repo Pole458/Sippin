@@ -368,20 +368,20 @@ public abstract class BaseMessage extends org.zoolu.tools.MonitoredObject
     {  message=message.substring((new SipParser(message)).indexOfNextHeader());
     }
 
-    /** Whether Message has any headers of specified name. */
+    /** Whether Message has any headers of specified rtpmap. */
     public boolean hasHeader(String name)
     {  Header hd=getHeader(name);
         if (hd==null) return false;
         else return true;
     }
 
-    /** Gets the first Header of specified name (returns null if no Header is found). */
+    /** Gets the first Header of specified rtpmap (returns null if no Header is found). */
     public Header getHeader(String hname)
     {  SipParser par=new SipParser(message);
         return par.getHeader(hname);
     }
 
-    /** Gets a Vector of all Headers of specified name (returns empty Vector if no Header is found). */
+    /** Gets a Vector of all Headers of specified rtpmap (returns empty Vector if no Header is found). */
     public Vector getHeaders(String hname)
     {  Vector v=new Vector();
         SipParser par=new SipParser(message);
@@ -495,12 +495,12 @@ public abstract class BaseMessage extends org.zoolu.tools.MonitoredObject
     }
     }
 
-    /** Removes first Header of specified name. */
+    /** Removes first Header of specified rtpmap. */
     public void removeHeader(String hname)
     {  removeHeader(hname,true);
     }
 
-    /** Removes first (or last) Header of specified name. */
+    /** Removes first (or last) Header of specified rtpmap. */
     public void removeHeader(String hname, boolean first)
     {  String[] target={'\n'+hname, '\r'+hname};
         SipParser par=new SipParser(message);
@@ -519,7 +519,7 @@ public abstract class BaseMessage extends org.zoolu.tools.MonitoredObject
         message=head.concat(tail);
     }
 
-    /** Sets the new Header (removing any previous headers of the same name). */
+    /** Sets the new Header (removing any previous headers of the same rtpmap). */
    /*public void setHeader(Header hd) 
    {  if (hasHeader(hd.getName())) removeAllHeaders(hd.getName());
       addHeader(hd,false);               
@@ -537,7 +537,7 @@ public abstract class BaseMessage extends org.zoolu.tools.MonitoredObject
             addHeader(hd,false);
     }
 
-    /** Removes all Headers of specified name. */
+    /** Removes all Headers of specified rtpmap. */
     public void removeAllHeaders(String hname)
     {  String[] target={'\n'+hname, '\r'+hname};
         SipParser par=new SipParser(message);

@@ -89,6 +89,7 @@ import java.util.Vector;
 public class SipProvider implements Configurable, TransportListener {
 
     private static final String TAG = "Sip:SipProvider";
+    private static final String SDP_TAG = "Sip:SDP";
 
     // **************************** Constants ****************************
 
@@ -119,7 +120,7 @@ public class SipProvider implements Configurable, TransportListener {
 
     // ********************* Configurable attributes *********************
 
-    /** Via IP address or fully-qualified domanin name (FQDN).
+    /** Via IP address or fully-qualified domanin rtpmap (FQDN).
      * Use 'auto-configuration' for auto detection, or let it undefined. */
     private String via_addr = null;
 
@@ -156,13 +157,13 @@ public class SipProvider implements Configurable, TransportListener {
      * By default, the folder "./cert" is used. */
     private String trust_folder="cert";
 
-    /** For TLS. Absolute file name of the certificate (containing the public key) of the local node.
-     * The file name includes the full path starting from the current working folder.
+    /** For TLS. Absolute file rtpmap of the certificate (containing the public key) of the local node.
+     * The file rtpmap includes the full path starting from the current working folder.
      * By default, the file "./cert/ssl.crt" is used. */
     private String cert_file="cert/ssl.crt";
 
-    /** For TLS. Absolute file name of the private key of the local node.
-     * The file name includes the full path starting from the current working folder.
+    /** For TLS. Absolute file rtpmap of the private key of the local node.
+     * The file rtpmap includes the full path starting from the current working folder.
      * By default, the file "./cert/ssl.key" is used. */
     private String key_file="cert/ssl.key";
 
@@ -436,7 +437,7 @@ public class SipProvider implements Configurable, TransportListener {
     {  return (sip_transports.containsKey(PROTO_TLS))? ((Transport)sip_transports.get(PROTO_TLS)).getLocalPort() : 0;
     }
 
-    /** Gets a valid contact address with user name and transport information. */
+    /** Gets a valid contact address with user rtpmap and transport information. */
     public SipURL getContactAddress(String user) {
         SipURL url = (getPort() != SipStack.default_port) ? new SipURL(user, getViaAddress(), getPort()) : new SipURL(user, getViaAddress());
         if(!hasTransport(PROTO_UDP))
@@ -444,7 +445,7 @@ public class SipProvider implements Configurable, TransportListener {
         return url;
     }
 
-    /** Gets a valid secure contact address with user name and transport information. */
+    /** Gets a valid secure contact address with user rtpmap and transport information. */
     public SipURL getSecureContactAddress(String user)
     {  if (hasTransport(SipProvider.PROTO_TLS))
     {  SipURL url=(getTlsPort()!=SipStack.default_tls_port)? new SipURL(user,getViaAddress(),getTlsPort()) : new SipURL(user,getViaAddress());
@@ -781,7 +782,7 @@ public class SipProvider implements Configurable, TransportListener {
             return null;
         }
         // logs
-        Log.v(TAG, "Message sent:\n"+msg.toString());
+        Log.v(SDP_TAG, "Message sent:\n\n"+msg.toString()+"\n");
 
         if (conn!=null) return new TransportConnId(conn);
         else return null;
@@ -800,7 +801,7 @@ public class SipProvider implements Configurable, TransportListener {
         }
         if (conn!=null)
         {  // logs
-            Log.v(TAG, "Message sent:\n"+msg.toString());
+            Log.v(SDP_TAG, "Message sent:\n\n"+msg.toString()+"\n");
 
             return new TransportConnId(conn);
         }
@@ -829,8 +830,8 @@ public class SipProvider implements Configurable, TransportListener {
         {  if (log_all_packets) Log.v(TAG, "NOT a SIP message: discarded\r\n");
             return;
         }
-//        Log.v(TAG, "received new SIP message");
-//        Log.v(TAG, "message:\r\n"+msg.toString());
+
+        Log.v(SDP_TAG, "Received message:\n\n"+msg.toString()+"\n");
 
         // if a request, handle "received" and "rport" parameters
         if (msg.isRequest())
@@ -866,7 +867,7 @@ public class SipProvider implements Configurable, TransportListener {
 
         // is there any listeners?
         if (sip_listeners.size()==0)
-        {  Log.v(TAG, "no listener found: meesage discarded.");
+        {  Log.v(TAG, "no listener found: message discarded.");
             return;
         }
 
@@ -1054,7 +1055,7 @@ public class SipProvider implements Configurable, TransportListener {
 
     /** (<b>Deprecated</b>) Constructs a NameAddress based on an input string.
      * The input string can be a:
-     * <br/> - <i>user</i> name,
+     * <br/> - <i>user</i> rtpmap,
      * <br/> - <i>user@address</i> url,
      * <br/> - <i>"Name" &lt;sip:user@address&gt;</i> address,
      * <p/>
@@ -1072,7 +1073,7 @@ public class SipProvider implements Configurable, TransportListener {
    /*private SipURL completeSipURL(String str)
    {  // in case it is passed only the 'user' field, add '@'<outbound_proxy>[':'<outbound_port>]
       if (!str.startsWith("sip:") && !str.startsWith("sips:") && str.indexOf("@")<0 && str.indexOf(".")<0 && str.indexOf(":")<0)
-      {  // probably it is just the user name..
+      {  // probably it is just the user rtpmap..
          if (outbound_proxy!=null)
          {  String host=outbound_proxy.getHost();
             int port=outbound_proxy.getPort();

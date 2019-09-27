@@ -43,16 +43,16 @@ public class SipURL
    /** SIPS scheme */
    protected static final String SIPS_SCHEME="sips"; 
 
-   /** Transport param name */
+   /** Transport param rtpmap */
    protected static final String PARAM_TRANSPORT="transport"; 
 
-   /** Maddr param name */
+   /** Maddr param rtpmap */
    protected static final String PARAM_MADDR="maddr"; 
 
-   /** TTL param name */
+   /** TTL param rtpmap */
    protected static final String PARAM_TTL="ttl"; 
 
-   /** Lr param name */
+   /** Lr param rtpmap */
    protected static final String PARAM_LR="lr"; 
 
 
@@ -132,7 +132,7 @@ public class SipURL
    {  return ((secure)? SIPS_SCHEME : SIP_SCHEME);
    }
 
-   /** Gets user name of SipURL (Returns null if user name does not exist). */
+   /** Gets user rtpmap of SipURL (Returns null if user rtpmap does not exist). */
    public String getUserName()
    {  int begin=getScheme().length()+1; // skip "sip:"
       int end=url.indexOf('@',begin);
@@ -168,7 +168,7 @@ public class SipURL
       }
    }
 
-   /** Gets boolean value to indicate if SipURL has user name. */
+   /** Gets boolean value to indicate if SipURL has user rtpmap. */
    public boolean hasUserName()
    {  return getUserName()!=null;
    }

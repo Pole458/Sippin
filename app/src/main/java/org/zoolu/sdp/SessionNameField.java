@@ -27,10 +27,10 @@ package org.zoolu.sdp;
 import org.zoolu.tools.Parser;
 
 
-/** SDP session name field.
+/** SDP session rtpmap field.
   * <p>
   * <BLOCKQUOTE><PRE>
-  *    session-name-field = "s=" text CRLF
+  *    session-rtpmap-field = "s=" text CRLF
   * </PRE></BLOCKQUOTE>
   */
 public class SessionNameField extends SdpField
@@ -50,7 +50,7 @@ public class SessionNameField extends SdpField
    {  super(sf);
    }
       
-   /** Gets the session name. */
+   /** Gets the session rtpmap. */
    public String getSession()
    {  return value;
    }

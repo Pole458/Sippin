@@ -27,7 +27,7 @@ public class AndroidAudioApp implements MediaApp {
 
         String remoteAddress = flow_spec.getRemoteAddress();
 
-        AudioCodec audioCodec = flow_spec.getAudioCodec();
+        AudioCodec audioCodec = flow_spec.getAudioCodec().getAudioCodec();
         Log.v(TAG, "Received audio spec: " + audioCodec.rtpmap);
         this.audioStream.setCodec(audioCodec);
         this.audioStream.setMode(flow_spec.getDirection());

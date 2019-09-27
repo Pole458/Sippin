@@ -1,9 +1,10 @@
 package local.media;
 
 
-
-import android.net.rtp.AudioCodec;
-import org.zoolu.sdp.*;
+import com.pole.sippin.AndroidAudioCodec;
+import org.zoolu.sdp.AttributeField;
+import org.zoolu.sdp.MediaDescriptor;
+import org.zoolu.sdp.MediaField;
 import org.zoolu.tools.Parser;
 
 import java.util.Vector;
@@ -24,14 +25,14 @@ public class MediaDesc {
     private String transport;
 
     /** Vector of media specifications */
-    private Vector<AudioCodec> audioCodecs;
+    private Vector<AndroidAudioCodec> audioCodecs;
 
     /** Creates a new MediaDesc.
      * @param media Media type
      * @param port Port
      * @param transport Transport protocol
      * @param audioCodecs Vector of media specifications (MediaSpec) */
-    public MediaDesc(String media, int port, String transport, Vector<AudioCodec> audioCodecs) {
+    public MediaDesc(String media, int port, String transport, Vector<AndroidAudioCodec> audioCodecs) {
         this.media = media;
         this.port = port;
         this.transport = transport;
@@ -49,7 +50,7 @@ public class MediaDesc {
         String transport = mf.getTransport();
 
         Vector<AttributeField> attributes = md.getAttributes("rtpmap");
-        Vector<AudioCodec> audioCodecs = new Vector<>(attributes.size());
+        Vector<AndroidAudioCodec> audioCodecs = new Vector<>(attributes.size());
 
         for (int i = 0; i < attributes.size(); i++) {
             Parser par = new Parser(attributes.elementAt(i).getAttributeValue());
@@ -58,7 +59,7 @@ public class MediaDesc {
             if (par.skipChar().hasMore()) {
                 codec = par.getWord(new char[]{'/'});
             }
-            audioCodecs.addElement(AudioCodec.getCodec(avp, codec, null));
+            audioCodecs.addElement(new AndroidAudioCodec(avp, codec));
         }
 
         this.media = media;
@@ -92,18 +93,18 @@ public class MediaDesc {
     }
 
     /** Gets Audio codecs */
-    public Vector<AudioCodec> getAudioCodecs() {
+    public Vector<AndroidAudioCodec> getAudioCodecs() {
         return audioCodecs;
     }
 
     /** Sets media specifications. */
-    public void setMediaSpecs(Vector<AudioCodec> media_specs) {
+    public void setMediaSpecs(Vector<AndroidAudioCodec> media_specs) {
         this.audioCodecs = media_specs;
     }
 
 
     /** Adds a new media specification. */
-    public void addMediaSpec(AudioCodec media_spec) {
+    public void addMediaSpec(AndroidAudioCodec media_spec) {
         if (audioCodecs ==null) audioCodecs = new Vector<>();
         audioCodecs.addElement(media_spec);
     }
@@ -114,7 +115,7 @@ public class MediaDesc {
         Vector<AttributeField> attributes = new Vector<>();
         if (audioCodecs !=null) {
             for (int i = 0; i< audioCodecs.size(); i++) {
-                AudioCodec codec = audioCodecs.elementAt(i);
+                AndroidAudioCodec codec = audioCodecs.elementAt(i);
                 formats.addElement(codec.type);
                 attributes.addElement(new AttributeField("rtpmap", codec.type + " " + codec.rtpmap));
             }

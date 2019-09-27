@@ -232,7 +232,7 @@ public class SipParser extends Parser
     /** Returns the first NameAddress in the string <i>str</i>.
      * If no NameAddress is found, it returns <b>null</b>.  
      * A NameAddress is a string of the form of:
-     * <BR><BLOCKQUOTE><PRE>&nbsp&nbsp "user's name" &lt;sip url&gt; </PRE></BLOCKQUOTE> */
+     * <BR><BLOCKQUOTE><PRE>&nbsp&nbsp "user's rtpmap" &lt;sip url&gt; </PRE></BLOCKQUOTE> */
     public NameAddress getNameAddress()
     {  String text=null;
         SipURL url=null;

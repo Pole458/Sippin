@@ -48,10 +48,10 @@ public class DialogInfo extends org.zoolu.tools.MonitoredObject
 
     // ************************ Private attributes ************************
 
-    /** Local name */
+    /** Local rtpmap */
     NameAddress local_name;
 
-    /** Remote name */
+    /** Remote rtpmap */
     NameAddress remote_name;
 
     /** Local contact url */
@@ -103,15 +103,15 @@ public class DialogInfo extends org.zoolu.tools.MonitoredObject
 
     // ************************** Public methods **************************
 
-    /** Sets the local name. */
+    /** Sets the local rtpmap. */
     public void setLocalName(NameAddress url) { local_name=url; }
-    /** Gets the local name. */
+    /** Gets the local rtpmap. */
     public NameAddress getLocalName() { return local_name; }
 
 
-    /** Sets the remote name. */
+    /** Sets the remote rtpmap. */
     public void setRemoteName(NameAddress url) { remote_name=url; }
-    /** Gets the remote name. */
+    /** Gets the remote rtpmap. */
     public NameAddress getRemoteName() { return remote_name; }
 
 

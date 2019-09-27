@@ -87,7 +87,7 @@ public class OfferAnswerModel
      * with olny the first specified media attribute.
      * <p> If no attribute is present for a media, the media is dropped.
      * @param sdp the given SessionDescriptor
-     * @param a_name the attribute name
+     * @param a_name the attribute rtpmap
      * @return this SessionDescriptor */
    /*public static SessionDescriptor sdpAttributeSelection(SessionDescriptor sdp, String a_name)
    {  Vector new_media=new Vector();

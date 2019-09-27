@@ -24,6 +24,8 @@ package local.ua;
 import android.net.rtp.AudioStream;
 import android.util.Log;
 import com.pole.sippin.AndroidAudioApp;
+import com.pole.sippin.AndroidAudioCodec;
+import com.pole.sippin.AndroidRtpAudioApp;
 import local.media.FlowSpec;
 import local.media.MediaApp;
 
@@ -35,15 +37,15 @@ import local.media.MediaApp;
  */
 class MediaAgent {
 
-    private static final String TAG = "MediaAgent";
+    private static final String TAG = "Sip:MediaAgent";
 
     /** Active media applications */
     private MediaApp active_media_app;
 
     /** Starts a media session */
-    boolean startMediaSession(FlowSpec flow_spec, AudioStream audioStream) {
+    boolean startMediaSession(FlowSpec flow_spec, UserAgent userAgent) {
 
-        Log.v(TAG, "start("+flow_spec.getAudioCodec()+")");
+        Log.v(TAG, "start ("+flow_spec.getAudioCodec().rtpmap+")");
         Log.v(TAG, "new flow: "+flow_spec.getLocalPort()+((flow_spec.getDirection()==AudioStream.MODE_SEND_ONLY)? "=-->" : ((flow_spec.getDirection()==AudioStream.MODE_RECEIVE_ONLY)? "<--=" : "<-->" ))+flow_spec.getRemoteAddress()+":"+flow_spec.getRemotePort());
 
         // start new media_app
@@ -56,7 +58,7 @@ class MediaAgent {
             active_media_app.stopApp();
         }
 
-        media_app = newAudioApp(flow_spec, audioStream);
+        media_app = newAudioApp(flow_spec, userAgent);
 
         if (media_app != null) {
             if (media_app.startApp()) {
@@ -83,13 +85,24 @@ class MediaAgent {
     // ********************** media applications *********************
 
     /** Creates a new audio application. */
-    private MediaApp newAudioApp(FlowSpec audio_flow, AudioStream audioStream) {
+    private MediaApp newAudioApp(FlowSpec audio_flow, UserAgent userAgent) {
 
         MediaApp audio_app;
 
-        audio_app = new AndroidAudioApp(audio_flow, audioStream);
+        if(audio_flow.getAudioCodec() == AndroidAudioCodec.L8 || audio_flow.getAudioCodec() == AndroidAudioCodec.L16) {
+            userAgent.closeAudioStream();
+//            while(userAgent.getAudioStream().isBusy()) {
+//                try {
+//                    Log.v(TAG, "Waiting for AudioStream to close");
+//                    Thread.sleep(10);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+            audio_app = new AndroidRtpAudioApp(audio_flow);
+        } else
+            audio_app = new AndroidAudioApp(audio_flow, userAgent.getAudioStream());
 
         return audio_app;
     }
-
 }

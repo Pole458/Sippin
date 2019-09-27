@@ -67,7 +67,7 @@ public class Header/* extends org.zoolu.tools.MonitoredObject*/
     catch (Exception e) {  return false;  }
     }
 
-    /** Gets name of Header */
+    /** Gets rtpmap of Header */
     public String getName()
     {  return name;
     }

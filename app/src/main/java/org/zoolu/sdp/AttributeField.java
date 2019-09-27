@@ -47,7 +47,7 @@ public class AttributeField extends SdpField
     {  super(sf);
     }
 
-    /** Gets the attribute name. */
+    /** Gets the attribute rtpmap. */
     public String getAttributeName()
     {  int i=value.indexOf(":");
         if (i<0) return value; else return value.substring(0,i);

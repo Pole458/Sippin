@@ -39,7 +39,7 @@ public class IpAddress {
 
     public static final String TAG = "Sip: IpAddress";
 
-    /** The host address/name */
+    /** The host address/rtpmap */
     private String address;
 
     /** The InetAddress */
@@ -100,7 +100,7 @@ public class IpAddress {
 
     // *********************** Static ***********************
 
-    /** Gets the IpAddress for a given fully-qualified host name. */
+    /** Gets the IpAddress for a given fully-qualified host rtpmap. */
     public static IpAddress getByName(String host_addr) throws java.net.UnknownHostException
     {  InetAddress iaddr=InetAddress.getByName(host_addr);
         return new IpAddress(iaddr);

@@ -4,22 +4,18 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
-import android.net.rtp.AudioCodec;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.*;
 import local.ua.UserAgent;
 import local.ua.UserAgentListener;
 import local.ua.UserAgentProfile;
 import org.zoolu.sip.address.NameAddress;
 import org.zoolu.sip.provider.SipProvider;
-
 
 import java.util.Vector;
 
@@ -28,8 +24,9 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
     private static final String TAG = "Sip: UAActivity";
 
-    private static final String addres = "<sip:alice@192.168.1.2:5070>";
-//    private static final String addres = "<sip:echo@mjsip.org>";
+//    private static final String addres = "<sip:alice@192.168.1.2:5070>";
+//    private static final String addres = "<sip:alice@160.78.237.132:5070>";
+    private static final String addres = "<sip:echo@mjsip.org>";
 
     // ********************** UserAgent logic **********************
 
@@ -53,6 +50,13 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
     private ImageButton hangUpButton;
 
     private TextView statusTextView;
+    
+    private CheckBox l8CheckBox;
+    private CheckBox l16CheckBox;
+    private CheckBox pcmaCheckBox;
+    private CheckBox amrCheckBox;
+    private CheckBox gsmCheckBox;
+    private CheckBox gsmEfrCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +69,20 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         hangUpButton = findViewById(R.id.closeCallButton);
         statusTextView = findViewById(R.id.statusTextView);
 
+        l8CheckBox = findViewById(R.id.l8CheckBox);
+        l16CheckBox = findViewById(R.id.l16CheckBox);
+        pcmaCheckBox = findViewById(R.id.pcmaCheckBox);
+        amrCheckBox = findViewById(R.id.amrCheckBox);
+        gsmCheckBox = findViewById(R.id.gsmCheckBox);
+        gsmEfrCheckBox = findViewById(R.id.gsmEfrCheckBox);
+
+        l8CheckBox.setOnCheckedChangeListener((v, b) -> ua.setShouldUseCodecs(AndroidAudioCodec.L8, b));
+        l16CheckBox.setOnCheckedChangeListener((v, b) -> ua.setShouldUseCodecs(AndroidAudioCodec.L16, b));
+        pcmaCheckBox.setOnCheckedChangeListener((v, b) -> ua.setShouldUseCodecs(AndroidAudioCodec.PCMA, b));
+        amrCheckBox.setOnCheckedChangeListener((v, b) -> ua.setShouldUseCodecs(AndroidAudioCodec.AMR, b));
+        gsmCheckBox.setOnCheckedChangeListener((v, b) -> ua.setShouldUseCodecs(AndroidAudioCodec.GSM, b));
+        gsmEfrCheckBox.setOnCheckedChangeListener((v, b) -> ua.setShouldUseCodecs(AndroidAudioCodec.GSM_EFR, b));
+        
         callButton.setOnClickListener(v -> call(numberTextView.getText().toString()));
         hangUpButton.setOnClickListener(v -> hangUp());
 
@@ -79,37 +97,15 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 
         requestRecordAudioPermission();
 
-        for (AudioCodec codec: AudioCodec.getCodecs()) {
-            Log.v(TAG, "Supported codecs: " + codec.type + " " + codec.rtpmap + " " + codec.fmtp);
-        }
-
-//
-//        // Set the re-invite
-//        if (ua_profile.re_invite_time > 0)
-//            reInvite(ua_profile.re_invite_time);
-//
-//        // Set the transfer (REFER)
-//        if (ua_profile.transfer_to != null && ua_profile.transfer_time > 0)
-//            callTransfer(ua_profile.transfer_to,ua_profile.transfer_time);
-//
-//        // Unregisters ALL contact URLs
-//        if (ua_profile.do_unregister_all){
-////            Log.v(TAG, "UNREGISTER ALL contact URLs");
-//            ua.unregisterall();
-//        }
-//
-//        // unregisters the contact URL
-//        if (ua_profile.do_unregister){
-////            Log.v(TAG, "UNREGISTER the contact URL");
-//            ua.unregister();
-//        }
-//
-        // registers the contact URL with the registrar server
-//        if (ua_profile.do_register) {
-////            Log.v(TAG, "REGISTRATION");
-//            ua.loopRegister(ua_profile.expires,ua_profile.expires / 2, ua_profile.keepalive_time);
-//        }
-
+    }
+    
+    private void setCheckBoxEnable(boolean b) {
+        l8CheckBox.setEnabled(b);
+        l16CheckBox.setEnabled(b);;
+        pcmaCheckBox.setEnabled(b);
+        amrCheckBox.setEnabled(b);
+        gsmCheckBox.setEnabled(b);
+        gsmEfrCheckBox.setEnabled(b);
     }
 
     @Override
@@ -123,47 +119,11 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
         super.onDestroy();
     }
 
-
-//    private String getInetAddress() {
-//
-//        WifiManager wifiMgr = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-//        if(wifiMgr != null) {
-//            WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
-//            int ip = wifiInfo.getIpAddress();
-//            @SuppressLint("DefaultLocale") String ipString = String.format(
-//                    "%d.%d.%d.%d",
-//                    (ip & 0xff),
-//                    (ip >> 8 & 0xff),
-//                    (ip >> 16 & 0xff),
-//                    (ip >> 24 & 0xff));
-//            return ipString;
-//        }
-//
-//        return null;
-//    }
-
     private void requestRecordAudioPermission() {
         //check API version, do nothing if API version < 23!
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentapiVersion > Build.VERSION_CODES.LOLLIPOP){
-
+        if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-
-//                // Should we show an explanation?
-//                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
-//
-//                    // Show an expanation to the user *asynchronously* -- don't block
-//                    // this thread waiting for the user's response! After the user
-//                    // sees the explanation, try again to request the permission.
-//
-//                } else {
-//
-//                    // No explanation needed, we can request the permission.
-//
-//                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-//                }
             }
         }
     }
@@ -232,15 +192,19 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
             switch (state) {
                 case UA_IDLE:
                     statusTextView.setText("Idle");
+                    setCheckBoxEnable(true);
                     break;
                 case UA_INCOMING_CALL:
                     statusTextView.setText("Incoming Call");
+                    setCheckBoxEnable(true);
                     break;
                 case UA_OUTGOING_CALL:
                     statusTextView.setText("Outgoing Call");
+                    setCheckBoxEnable(false);
                     break;
                 case UA_ON_CALL:
                     statusTextView.setText("On Call");
+                    setCheckBoxEnable(false);
                     break;
             }
         });
@@ -343,48 +307,5 @@ public class UAActivity extends AppCompatActivity implements UserAgentListener {
 //        this.setTitle(sip_provider.getContactAddress(ua_profile.user).toString());
 //        Log.v(TAG, "REGISTRATION FAILURE: "+result);
     }
-
-    // ************************ scheduled events ************************
-
-    /** Schedules a re-inviting after <i>delay_time</i> secs. It simply changes the contact address. */
-    private void reInvite(final int delay_time) {
-//        Log.v(TAG, "AUTOMATIC RE-INVITING/MODIFYING: " + delay_time + " secs");
-//        if (delay_time==0)
-//            ua.modify(null);
-//        else new ScheduledWork(delay_time*1000) {
-//            public void doWork() {
-//                ua.modify(null);
-//            }
-//        };
-    }
-
-    /** Schedules a call-transfer after <i>delay_time</i> secs. */
-    private void callTransfer(final NameAddress transfer_to, final int delay_time) {
-//        Log.v(TAG, "AUTOMATIC REFER/TRANSFER: "+delay_time+" secs");
-//        if (delay_time==0) ua.transfer(transfer_to);
-//        else new ScheduledWork(delay_time*1000) {  public void doWork() {  ua.transfer(transfer_to);  }  };
-    }
-
-
-//    /** Schedules a call-transfer after <i>delay_time</i> secs. */
-//    private void callTransfer(final NameAddress transfer_to, final int delay_time) {
-//        Log.v(TAG, "AUTOMATIC REFER/TRANSFER: "+delay_time+" secs");
-//        if (delay_time==0) ua.transfer(transfer_to);
-//        else new ScheduledWork(delay_time*1000) {  public void doWork() {  ua.transfer(transfer_to);  }  };
-//    }
-//
-//
-//    /** Schedules an automatic hangup after <i>delay_time</i> secs. */
-//    private void automaticHangup(final int delay_time) {
-//        Log.v(TAG, "AUTOMATIC HANGUP: "+delay_time+" secs");
-//        if (delay_time == 0)
-//            hangUp();
-//        else
-//            new ScheduledWork(delay_time*1000) {
-//                public void doWork() {
-//                    hangUp();
-//                }
-//            };
-//    }
 
 }

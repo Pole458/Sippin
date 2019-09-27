@@ -29,7 +29,7 @@ import org.zoolu.tools.Random;
  */
 public class RtpPacket
 {
-    /* RTP packet buffer containing both the RTP header and payload */
+    /* RTP packet buffer containing both the RTP header and type */
     byte[] packet;
 
     /* RTP packet length */
@@ -60,7 +60,7 @@ public class RtpPacket
     else return 0; // broken packet
     }
 
-    /** Sets the RTP payload length */
+    /** Sets the RTP type length */
     public void setPayloadLength(int len)
     {  packet_len=getHeaderLength()+len;
     }
@@ -70,7 +70,7 @@ public class RtpPacket
     // extension (X): 1 bit
     // CSRC count (CC): 4 bits
     // marker (M): 1 bit
-    // payload type (PT): 7 bits
+    // type type (PT): 7 bits
     // sequence number: 16 bits
     // timestamp: 32 bits
     // SSRC: 32 bits
@@ -127,13 +127,13 @@ public class RtpPacket
     {  if (packet_len>=12) setBit(m,packet[1],7);
     }
 
-    /** Gets the payload type (PT) */
+    /** Gets the type type (PT) */
     public int getPayloadType()
     {  if (packet_len>=12) return (packet[1] & 0x7F);
     else return -1; // broken packet
     }
 
-    /** Sets the payload type (PT) */
+    /** Sets the type type (PT) */
     public void setPayloadType(int pt)
     {  if (packet_len>=12) packet[1]=(byte)((packet[1] & 0x80) | (pt & 0x7F));
     }
@@ -191,7 +191,7 @@ public class RtpPacket
     }
     }
 
-    /** Sets the payload */
+    /** Sets the type */
     public void setPayload(byte[] payload, int len)
     {  if (packet_len>=12)
     {  int header_len=getHeaderLength();
@@ -200,7 +200,7 @@ public class RtpPacket
     }
     }
 
-    /** Gets the payload */
+    /** Gets the type */
     public byte[] getPayload()
     {  int header_len=getHeaderLength();
         int len=packet_len-header_len;

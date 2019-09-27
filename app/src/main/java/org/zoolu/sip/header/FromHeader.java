@@ -30,7 +30,7 @@ import org.zoolu.sip.address.*;
 /** SIP Header From.
  * The From header field indicates the logical identity of the initiator
  * of the request, possibly the user's address-of-record.  Like the To
- * header field, it contains a URI and optionally a display name.
+ * header field, it contains a URI and optionally a display rtpmap.
  * <BR> The From field MUST contain a new "tag" parameter, chosen by the UAC.
  */
 public class FromHeader extends EndPointHeader

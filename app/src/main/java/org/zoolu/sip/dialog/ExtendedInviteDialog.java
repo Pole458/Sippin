@@ -53,10 +53,10 @@ public class ExtendedInviteDialog extends InviteDialog
     Hashtable transactions;
 
 
-    /** User name. */
+    /** User rtpmap. */
     String username;
 
-    /** User name. */
+    /** User rtpmap. */
     String realm;
 
     /** User's passwd. */

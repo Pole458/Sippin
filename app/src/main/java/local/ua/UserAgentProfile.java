@@ -4,6 +4,7 @@ package local.ua;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.rtp.AudioCodec;
+import android.util.Log;
 import local.media.MediaDesc;
 import org.zoolu.sip.address.NameAddress;
 import org.zoolu.sip.address.SipURL;
@@ -23,17 +24,17 @@ public class UserAgentProfile implements Configurable {
 
     // ********************** user configurations *********************
 
-    /** Display name for the user.
+    /** Display rtpmap for the user.
      * It is used in the user's AOR registered to the registrar server
      * and used as From URL. */
     private String display_name = null;
 
-    /** User's name.
+    /** User's rtpmap.
      * It is used to build the user's AOR registered to the registrar server
      * and used as From URL. */
     public String user = null;
 
-    /** Fully qualified domain name (or address) of the proxy server.
+    /** Fully qualified domain rtpmap (or address) of the proxy server.
      * It is part of the user's AOR registered to the registrar server
      * and used as From URL.
      * <p/>
@@ -42,7 +43,7 @@ public class UserAgentProfile implements Configurable {
      * If <i>registrar</i> is not defined, the <i>proxy</i> value is used in its place. */
     public String proxy = null;
 
-    /** Fully qualified domain name (or address) of the registrar server.
+    /** Fully qualified domain rtpmap (or address) of the registrar server.
      * It is used as recipient for REGISTER requests.
      * <p/>
      * If <i>registrar</i> is not defined, the <i>proxy</i> value is used in its place.
@@ -54,7 +55,7 @@ public class UserAgentProfile implements Configurable {
      * It is the SIP address of the MyUA and is used to form the From URL if no proxy is configured. */
     private String ua_address = null;
 
-    /** User's name used for server authentication. */
+    /** User's rtpmap used for server authentication. */
     String auth_user = null;
     /** User's realm used for server authentication. */
     String auth_realm = null;
@@ -124,10 +125,6 @@ public class UserAgentProfile implements Configurable {
     /** First media port (use it if you want to use media ports different from those specified in mediaDescs) */
     int media_port = -1;
 
-    /** Vector of media descriptions (MediaDesc) */
-    Vector<MediaDesc> mediaDescs = new Vector<>();
-
-
     // ******************** undocumented parametes ********************
 
     /** Whether running the UAS (User Agent Server), or acting just as UAC (User Agent Client). In the latter case only outgoing calls are supported. */
@@ -141,7 +138,7 @@ public class UserAgentProfile implements Configurable {
     // ********************* historical parametes *********************
 
     /** Default audio port */
-    private int audio_port = 4000;
+    int audio_port = 4000;
     /** Default video port */
     private int video_port = 4002;
 
@@ -151,13 +148,6 @@ public class UserAgentProfile implements Configurable {
     public UserAgentProfile(Context context) {
 
         readAll(context);
-
-        Vector<AudioCodec> audioCodecs = new Vector<>();
-        for(AudioCodec codec : AudioCodec.getCodecs()) {
-           audioCodecs.addElement(codec);
-        }
-
-        mediaDescs.addElement(new MediaDesc("audio", audio_port, "RTP/AVP", audioCodecs));
 
         setUnconfiguredAttributes(null);
     }

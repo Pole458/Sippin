@@ -32,7 +32,7 @@ import org.zoolu.sip.provider.SipParser;
  * The Via header field indicates the transport used for the transaction
  * and identifies the location where the response is to be sent.
  * <BR> When the UAC creates a request, it MUST insert a Via into that
- * request.  The protocol name and protocol version in the header field
+ * request.  The protocol rtpmap and protocol version in the header field
  * is SIP and 2.0, respectively.
  * <BR> The Via header field value MUST
  * contain a branch parameter.  This parameter is used to identify the

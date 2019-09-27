@@ -42,7 +42,7 @@ public class TransactionId extends SipId
     {  super(i);
     }
 
-    /** Costructs a new TransactionId based only on method name. */
+    /** Costructs a new TransactionId based only on method rtpmap. */
     public TransactionId(String method)
     {  id=method;
     }

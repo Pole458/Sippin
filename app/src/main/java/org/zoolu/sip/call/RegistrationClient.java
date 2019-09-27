@@ -52,7 +52,7 @@ public class RegistrationClient implements TransactionClientListener, TimerListe
    /** SipProvider */
    protected SipProvider sip_provider;
 
-   /** Fully qualified domain name of the registrar server. */
+   /** Fully qualified domain rtpmap of the registrar server. */
    protected SipURL registrar;
 
    /** URI registered with registrar server. */
@@ -61,10 +61,10 @@ public class RegistrationClient implements TransactionClientListener, TimerListe
    /** URI of the user that is actually performing the registration. */
    protected NameAddress from;
 
-   /** User name. */
+   /** User rtpmap. */
    protected String username;
 
-   /** User name. */
+   /** User rtpmap. */
    protected String realm;
 
    /** User's passwd. */

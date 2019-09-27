@@ -30,7 +30,7 @@ import org.zoolu.tools.Parser;
 
 /** SIP Event header (RFC 3265).
  * <p>Event is a request header field (request-header).
- * It appears in SUBSCRIBE and NOTIFY requests. It provides a event-package name. */
+ * It appears in SUBSCRIBE and NOTIFY requests. It provides a event-package rtpmap. */
 public class EventHeader extends ParametricHeader
 {
     /** State delimiters. */
@@ -52,7 +52,7 @@ public class EventHeader extends ParametricHeader
     {  super(hd);
     }
 
-    /** Gets the event name. */
+    /** Gets the event rtpmap. */
     public String getEvent()
     {  return new Parser(value).getWord(delim);
     }
