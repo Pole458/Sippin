@@ -40,6 +40,9 @@ public class AndroidAudioApp implements MediaApp {
         } catch (UnknownHostException e) {
             Log.e(TAG, e.getMessage(), e);
         }
+
+        Log.v(TAG, "RTP: localhost:" + audioStream.getLocalPort() + "  --> " + audioStream.getRemoteAddress() + ":" + audioStream.getRemotePort());
+
     }
     
     @Override

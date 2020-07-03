@@ -85,6 +85,7 @@ public class AndroidRtpAudioApp implements MediaApp {
                             .setBufferSizeInBytes(AudioRecord.getMinBufferSize(sample_rate, AudioFormat.CHANNEL_IN_MONO, audioFormat))
                             .build();
 
+
                 } else {
                     audio_record = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, sample_rate,
                     AudioFormat.CHANNEL_IN_MONO, audioFormat, AudioRecord.getMinBufferSize(
@@ -105,6 +106,9 @@ public class AndroidRtpAudioApp implements MediaApp {
                     AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
                             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build();
 
+                    int buff_size = AudioTrack.getMinBufferSize(sample_rate, AudioFormat.CHANNEL_OUT_MONO, audioFormat);
+                    Log.v(TAG, "audio track buff size: " + buff_size);
+
                     audio_track = new AudioTrack.Builder()
                             .setAudioAttributes(audioAttributes)
                             .setAudioFormat(audio_format_out)
@@ -120,6 +124,7 @@ public class AndroidRtpAudioApp implements MediaApp {
 
                 // receiver
                 receiver = new AndroidRtpStreamReceiver(audio_track, socket);
+                Log.v(TAG, "audio track state: " + audio_track.getState());
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
