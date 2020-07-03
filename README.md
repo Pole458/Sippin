@@ -1,6 +1,6 @@
 # Sippin
 
-Sippin is an open source library based on [mjSip]([http://www.mjsip.org/](http://www.mjsip.org/)) for making VoIP calls on Android leveraging on the SIP protocol.
+Sippin is an open source library based on [mjSip](http://www.mjsip.org/) for making VoIP calls on Android leveraging on the SIP protocol.
 
 This library only supports audio calls. In particular, the following audio codec are supported:
 - L8
